@@ -240,6 +240,36 @@
         font-weight: 700;
         font-style: normal;
       }
+
+      #lightbox-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.85);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+
+      #lightbox-overlay img {
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 8px;
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+        object-fit: contain;
+        transition: transform 0.3s ease;
+      }
+
+      #lightbox-overlay:hover img {
+        transform: scale(1.02);
+      }
+
+      body.lightbox-open {
+        overflow: hidden;
+      }
     </style>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -288,10 +318,12 @@
               <section>
                 <ul>
                   <li>
-                    First conversation after matching on CMB<br /><img
+                    First conversation after matching on CMB<br />
+                    <img
                       class="graphic_img"
                       src="moments/07_jan_2025.png"
                       alt="Graphic"
+                      data-full="moments/07_jan_2025.png"
                     />
                   </li>
                 </ul>
@@ -1158,5 +1190,35 @@
         </div>
       </div>
     </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Create the lightbox overlay
+        const lightbox = document.createElement("div");
+        lightbox.id = "lightbox-overlay";
+        lightbox.innerHTML = "<img>";
+        document.body.appendChild(lightbox);
+
+        const lightboxImg = lightbox.querySelector("img");
+
+        // Attach click listener to all images on the page
+        document.querySelectorAll("img").forEach((img) => {
+          img.style.cursor = "zoom-in"; // Optional, gives a visual cue
+
+          img.addEventListener("click", () => {
+            const fullSrc = img.getAttribute("data-full") || img.src;
+            lightboxImg.src = fullSrc;
+            lightbox.style.display = "flex";
+            document.body.classList.add("lightbox-open");
+          });
+        });
+
+        // Close lightbox on click anywhere
+        lightbox.addEventListener("click", () => {
+          lightbox.style.display = "none";
+          lightboxImg.src = "";
+          document.body.classList.remove("lightbox-open");
+        });
+      });
+    </script>
   </body>
 </html>
