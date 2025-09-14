@@ -1227,15 +1227,15 @@
         const hash = await hashPassword(val);
 
         if (hash === correctHash) {
+          // Save authentication **before redirect**
           sessionStorage.setItem("authenticated", "true");
 
-          // Reset zoom: blur input and scroll to top
+          // Reset mobile zoom
           input.blur();
           window.scrollTo(0, 0);
 
-          // Hide overlay and restore page scroll
-          document.getElementById("password-overlay").style.display = "none";
-          document.body.style.overflow = "auto";
+          // Redirect to same page
+          window.location.href = window.location.href;
         } else {
           alert("Wrong password!");
         }
@@ -1245,13 +1245,18 @@
         const input = document.getElementById("pw-input");
         const btn = document.getElementById("pw-btn");
 
+        // Check if already authenticated **before showing overlay**
         if (sessionStorage.getItem("authenticated") === "true") {
-          document.getElementById("password-overlay").style.display = "none";
+          // Already authenticated — hide overlay completely
+          const overlay = document.getElementById("password-overlay");
+          if (overlay) overlay.style.display = "none";
           document.body.style.overflow = "auto";
+          return; // skip adding events
         } else {
-          document.body.style.overflow = "hidden";
+          document.body.style.overflow = "hidden"; // block scroll while overlay active
         }
 
+        // Attach events
         btn.addEventListener("click", checkPassword);
         input.addEventListener("keydown", (e) => {
           if (e.key === "Enter") checkPassword();

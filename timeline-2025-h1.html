@@ -2182,12 +2182,20 @@
       }
 
       async function checkPassword() {
-        const input = document.getElementById("pw-input").value;
-        const hash = await hashPassword(input);
+        const input = document.getElementById("pw-input");
+        const val = input.value;
+        const hash = await hashPassword(val);
+
         if (hash === correctHash) {
+          // Save authentication **before redirect**
           sessionStorage.setItem("authenticated", "true");
-          document.getElementById("password-overlay").style.display = "none";
-          document.body.style.overflow = "auto"; // re-enable scrolling
+
+          // Reset mobile zoom
+          input.blur();
+          window.scrollTo(0, 0);
+
+          // Redirect to same page
+          window.location.href = window.location.href;
         } else {
           alert("Wrong password!");
         }
@@ -2197,22 +2205,22 @@
         const input = document.getElementById("pw-input");
         const btn = document.getElementById("pw-btn");
 
+        // Check if already authenticated **before showing overlay**
         if (sessionStorage.getItem("authenticated") === "true") {
-          document.getElementById("password-overlay").style.display = "none";
+          // Already authenticated — hide overlay completely
+          const overlay = document.getElementById("password-overlay");
+          if (overlay) overlay.style.display = "none";
           document.body.style.overflow = "auto";
+          return; // skip adding events
         } else {
-          document.body.style.overflow = "hidden"; // block background scroll
+          document.body.style.overflow = "hidden"; // block scroll while overlay active
         }
 
-        // click event
+        // Attach events
         btn.addEventListener("click", checkPassword);
-
-        // Enter key event
         input.addEventListener("keydown", (e) => {
           if (e.key === "Enter") checkPassword();
         });
-
-        // auto-focus input
         input.focus();
       });
     </script>
