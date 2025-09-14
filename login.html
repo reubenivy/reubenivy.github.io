@@ -29,7 +29,7 @@
 
       input {
         padding: 12px 16px;
-        font-size: 15px; /* triggers mobile zoom */
+        font-size: 15px; /* <16px triggers mobile zoom */
         border-radius: 6px;
         border: 2px solid #000;
         margin-bottom: 1rem;
@@ -60,7 +60,7 @@
   <body>
     <div id="login-box">
       <h2>Enter Password</h2>
-      <input type="password" id="pw-input" placeholder="Password" autofocus />
+      <input type="password" id="pw-input" placeholder="Password" />
       <button id="pw-btn">Submit</button>
     </div>
 
@@ -91,9 +91,14 @@
       document.addEventListener("DOMContentLoaded", () => {
         const input = document.getElementById("pw-input");
 
-        // fallback for desktop flex issues
-        setTimeout(() => input.focus(), 50);
+        // Autofocus and mobile zoom
+        input.focus();
+        input.style.fontSize = "15px"; // ensure mobile zoom triggers
+        input.addEventListener("focus", () => {
+          input.style.fontSize = "15px";
+        });
 
+        // Event listeners
         document
           .getElementById("pw-btn")
           .addEventListener("click", checkPassword);
