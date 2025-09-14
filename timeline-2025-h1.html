@@ -306,6 +306,84 @@
       }
     </style>
 
+    <style>
+      /* FULLSCREEN PASSWORD OVERLAY */
+      #password-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #ffcc00; /* full yellow background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100000;
+        flex-direction: column;
+        font-family: "Fira Sans", sans-serif;
+        color: #000;
+        overflow: hidden; /* prevent scroll behind overlay */
+      }
+
+      #password-overlay h2 {
+        margin-bottom: 20px;
+        font-weight: 500;
+        color: #000;
+        font-size: 1.5em;
+        text-align: center;
+      }
+
+      #password-overlay input {
+        padding: 12px 16px;
+        font-size: 1.2em;
+        border-radius: 6px;
+        border: 2px solid #000; /* black border */
+        background: #fff; /* white input field */
+        color: #000; /* black text */
+        text-align: center;
+        outline: none;
+        font-weight: bold;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+      }
+
+      #password-overlay input:focus {
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+        transform: scale(1.02);
+      }
+
+      #password-overlay button {
+        margin-top: 20px;
+        padding: 12px 24px;
+        font-size: 1em;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        background: #3498db; /* sky blue */
+        color: #fff; /* white text */
+        font-weight: bold;
+        transition: background 0.3s ease, transform 0.2s ease,
+          box-shadow 0.2s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      }
+
+      #password-overlay button:hover {
+        background: #5dade2; /* lighter sky blue on hover */
+        transform: scale(1.05);
+        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Optional: make overlay fade-in smoothly */
+      #password-overlay {
+        opacity: 1;
+        transition: opacity 0.4s ease;
+      }
+
+      #password-overlay.hidden {
+        opacity: 0;
+        pointer-events: none; /* prevent interaction after fade-out */
+      }
+    </style>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -2048,11 +2126,17 @@
     </div>
 
     <div class="bottom-nav">
-      <a href="timeline.html" class="left" style="padding-left: 10px">Prev</a>
-      <a href="#" class="right" style="padding-right: 10px"></a>
+      <a href="#" class="left" style="padding-left: 10px"></a>
+      <a href="timeline-2025-h1.html" class="right" style="padding-right: 10px"
+        >Next</a
+      >
     </div>
 
-    <div id="bottom"></div>
+    <div id="password-overlay">
+      <h2>Enter Password</h2>
+      <input type="password" id="pw-input" placeholder="Password" />
+      <button id="pw-btn">Submit</button>
+    </div>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
@@ -2082,6 +2166,54 @@
           lightboxImg.src = "";
           document.body.classList.remove("lightbox-open");
         });
+      });
+    </script>
+
+    <script>
+      const correctHash =
+        "5e48fb6a15e3f7e7893a8b1c9f7d0b986226442fb93b76297024499f4aaa3fcd"; // SHA-256 hash
+
+      async function hashPassword(pwd) {
+        const enc = new TextEncoder().encode(pwd);
+        const buf = await crypto.subtle.digest("SHA-256", enc);
+        return Array.from(new Uint8Array(buf))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
+
+      async function checkPassword() {
+        const input = document.getElementById("pw-input").value;
+        const hash = await hashPassword(input);
+        if (hash === correctHash) {
+          sessionStorage.setItem("authenticated", "true");
+          document.getElementById("password-overlay").style.display = "none";
+          document.body.style.overflow = "auto"; // re-enable scrolling
+        } else {
+          alert("Wrong password!");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const input = document.getElementById("pw-input");
+        const btn = document.getElementById("pw-btn");
+
+        if (sessionStorage.getItem("authenticated") === "true") {
+          document.getElementById("password-overlay").style.display = "none";
+          document.body.style.overflow = "auto";
+        } else {
+          document.body.style.overflow = "hidden"; // block background scroll
+        }
+
+        // click event
+        btn.addEventListener("click", checkPassword);
+
+        // Enter key event
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") checkPassword();
+        });
+
+        // auto-focus input
+        input.focus();
       });
     </script>
   </body>
