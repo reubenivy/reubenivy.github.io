@@ -1,7 +1,7 @@
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
     <title>Reuben & Ivy</title>
     <link
       rel="stylesheet"
@@ -29,7 +29,7 @@
 
       input {
         padding: 12px 16px;
-        font-size: 1.2em;
+        font-size: 15px; /* triggers mobile zoom */
         border-radius: 6px;
         border: 2px solid #000;
         margin-bottom: 1rem;
@@ -56,15 +56,11 @@
       }
     </style>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
-
-    <script>
-      window.console = window.console || function (t) {};
-    </script>
   </head>
   <body>
     <div id="login-box">
       <h2>Enter Password</h2>
-      <input type="password" id="pw-input" placeholder="Password" />
+      <input type="password" id="pw-input" placeholder="Password" autofocus />
       <button id="pw-btn">Submit</button>
     </div>
 
@@ -81,23 +77,29 @@
       }
 
       async function checkPassword() {
-        const input = document.getElementById("pw-input");
-        const val = input.value;
+        const val = document.getElementById("pw-input").value;
         const hash = await hashPassword(val);
 
         if (hash === correctHash) {
-          sessionStorage.setItem("authenticated", "true");
-          window.location.href = "timeline.html"; // redirect to main page
+          sessionStorage.setItem("authenticated", "true"); // session-only
+          window.location.href = "timeline.html"; // redirect
         } else {
           alert("Wrong password!");
         }
       }
 
-      document
-        .getElementById("pw-btn")
-        .addEventListener("click", checkPassword);
-      document.getElementById("pw-input").addEventListener("keydown", (e) => {
-        if (e.key === "Enter") checkPassword();
+      document.addEventListener("DOMContentLoaded", () => {
+        const input = document.getElementById("pw-input");
+
+        // fallback for desktop flex issues
+        setTimeout(() => input.focus(), 50);
+
+        document
+          .getElementById("pw-btn")
+          .addEventListener("click", checkPassword);
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") checkPassword();
+        });
       });
     </script>
   </body>
