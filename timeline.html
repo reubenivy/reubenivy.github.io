@@ -306,67 +306,6 @@
       }
     </style>
 
-    <style>
-      #password-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: #ffcc00; /* yellow background */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 100000;
-        flex-direction: column;
-        font-family: "Fira Sans", sans-serif;
-        color: #000;
-        overflow: hidden;
-      }
-
-      #password-overlay h2 {
-        margin-bottom: 20px;
-        font-weight: 500;
-        color: #000;
-        font-size: 1.5em;
-        text-align: center;
-      }
-
-      #password-overlay input {
-        padding: 12px 16px;
-        font-size: 1.2em; /* >=16px prevents mobile auto-zoom */
-        border-radius: 6px;
-        border: 2px solid #000;
-        background: #fff;
-        color: #000;
-        text-align: center;
-        outline: none;
-        font-weight: bold;
-      }
-
-      #password-overlay input:focus {
-        box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
-      }
-
-      #password-overlay button {
-        margin-top: 20px;
-        padding: 12px 24px;
-        font-size: 1em;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        background: #3498db; /* sky blue */
-        color: #fff;
-        font-weight: bold;
-        transition: background 0.3s ease, transform 0.2s ease;
-      }
-
-      #password-overlay button:hover {
-        background: #5dade2;
-        transform: scale(1.05);
-      }
-    </style>
-
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -1172,12 +1111,6 @@
       >
     </div>
 
-    <div id="password-overlay">
-      <h2>Enter Password</h2>
-      <input type="password" id="pw-input" placeholder="Password" />
-      <button id="pw-btn">Submit</button>
-    </div>
-
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         // Create the lightbox overlay
@@ -1210,58 +1143,13 @@
     </script>
 
     <script>
-      const correctHash =
-        "3dedbfa834f36bfb30ce5a9a5bca8ceb7fe48d8e38ec21d6903a5c464a43cae8";
-
-      async function hashPassword(pwd) {
-        const enc = new TextEncoder().encode(pwd);
-        const buf = await crypto.subtle.digest("SHA-256", enc);
-        return Array.from(new Uint8Array(buf))
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join("");
-      }
-
-      async function checkPassword() {
-        const input = document.getElementById("pw-input");
-        const val = input.value;
-        const hash = await hashPassword(val);
-
-        if (hash === correctHash) {
-          // Save authentication **before redirect**
-          sessionStorage.setItem("authenticated", "true");
-
-          // Reset mobile zoom
-          input.blur();
-          window.scrollTo(0, 0);
-
-          // Redirect to same page
-          window.location.href = window.location.href;
-        } else {
-          alert("Wrong password!");
-        }
-      }
-
       document.addEventListener("DOMContentLoaded", () => {
-        const input = document.getElementById("pw-input");
-        const btn = document.getElementById("pw-btn");
-
-        // Check if already authenticated **before showing overlay**
-        if (sessionStorage.getItem("authenticated") === "true") {
-          // Already authenticated — hide overlay completely
-          const overlay = document.getElementById("password-overlay");
-          if (overlay) overlay.style.display = "none";
-          document.body.style.overflow = "auto";
-          return; // skip adding events
-        } else {
-          document.body.style.overflow = "hidden"; // block scroll while overlay active
+        // Check if user is authenticated
+        if (sessionStorage.getItem("authenticated") !== "true") {
+          // Redirect to login page if not
+          window.location.href = "login.html";
         }
-
-        // Attach events
-        btn.addEventListener("click", checkPassword);
-        input.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") checkPassword();
-        });
-        input.focus();
+        // Otherwise, do nothing and let the page load normally
       });
     </script>
   </body>
