@@ -307,14 +307,13 @@
     </style>
 
     <style>
-      /* FULLSCREEN PASSWORD OVERLAY */
       #password-overlay {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: #ffcc00; /* full yellow background */
+        background: #ffcc00; /* yellow background */
         display: flex;
         justify-content: center;
         align-items: center;
@@ -322,7 +321,7 @@
         flex-direction: column;
         font-family: "Fira Sans", sans-serif;
         color: #000;
-        overflow: hidden; /* prevent scroll behind overlay */
+        overflow: hidden;
       }
 
       #password-overlay h2 {
@@ -335,20 +334,18 @@
 
       #password-overlay input {
         padding: 12px 16px;
-        font-size: 1.2em;
+        font-size: 1.2em; /* >=16px prevents mobile auto-zoom */
         border-radius: 6px;
-        border: 2px solid #000; /* black border */
-        background: #fff; /* white input field */
-        color: #000; /* black text */
+        border: 2px solid #000;
+        background: #fff;
+        color: #000;
         text-align: center;
         outline: none;
         font-weight: bold;
-        transition: box-shadow 0.2s ease, transform 0.2s ease;
       }
 
       #password-overlay input:focus {
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
-        transform: scale(1.02);
       }
 
       #password-overlay button {
@@ -359,28 +356,14 @@
         border-radius: 6px;
         cursor: pointer;
         background: #3498db; /* sky blue */
-        color: #fff; /* white text */
+        color: #fff;
         font-weight: bold;
-        transition: background 0.3s ease, transform 0.2s ease,
-          box-shadow 0.2s ease;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        transition: background 0.3s ease, transform 0.2s ease;
       }
 
       #password-overlay button:hover {
-        background: #5dade2; /* lighter sky blue on hover */
+        background: #5dade2;
         transform: scale(1.05);
-        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
-      }
-
-      /* Optional: make overlay fade-in smoothly */
-      #password-overlay {
-        opacity: 1;
-        transition: opacity 0.4s ease;
-      }
-
-      #password-overlay.hidden {
-        opacity: 0;
-        pointer-events: none; /* prevent interaction after fade-out */
       }
     </style>
 
@@ -1239,12 +1222,20 @@
       }
 
       async function checkPassword() {
-        const input = document.getElementById("pw-input").value;
-        const hash = await hashPassword(input);
+        const input = document.getElementById("pw-input");
+        const val = input.value;
+        const hash = await hashPassword(val);
+
         if (hash === correctHash) {
           sessionStorage.setItem("authenticated", "true");
+
+          // Reset zoom: blur input and scroll to top
+          input.blur();
+          window.scrollTo(0, 0);
+
+          // Hide overlay and restore page scroll
           document.getElementById("password-overlay").style.display = "none";
-          document.body.style.overflow = "auto"; // re-enable scrolling
+          document.body.style.overflow = "auto";
         } else {
           alert("Wrong password!");
         }
@@ -1258,18 +1249,13 @@
           document.getElementById("password-overlay").style.display = "none";
           document.body.style.overflow = "auto";
         } else {
-          document.body.style.overflow = "hidden"; // block background scroll
+          document.body.style.overflow = "hidden";
         }
 
-        // click event
         btn.addEventListener("click", checkPassword);
-
-        // Enter key event
         input.addEventListener("keydown", (e) => {
           if (e.key === "Enter") checkPassword();
         });
-
-        // auto-focus input
         input.focus();
       });
     </script>
