@@ -2,179 +2,152 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cinematic Photo Stack Story</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cinematic Story</title>
     <style>
-        /* 1. Base Setup */
-        body, html {
+        /* ==========================================
+           CSS RESET AND BODY STYLES
+           ========================================== */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #000;
+            color: #fff;
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             overflow: hidden;
-            font-family: 'Georgia', serif;
+            user-select: none;
+            touch-action: manipulation;
+            position: relative;
         }
 
-        /* 2. Background and Section Container */
-        .background-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            overflow: hidden;
-        }
-        .background-image {
-            width: 100%;
-            height: 100%;
-            background-image: url('https://reubenivy.github.io/moments/5_apr_2025_5.jpg');
-            background-size: cover;
-            background-position: center;
-            animation: breathe 20s ease-in-out infinite alternate;
-        }
-        @keyframes breathe {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.15); } /* Slow zoom-in effect */
-        }
-
-        /* 3. Full-Screen Content Area */
+        /* ==========================================
+           CONTENT AREA AND TEXT SECTIONS
+           ========================================== */
         #content-area {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            max-height: 900px;
             display: flex;
             justify-content: center;
             align-items: center;
-            pointer-events: none;
             transition: opacity 1s ease-in-out;
-            opacity: 0;
-            z-index: 10;
+            opacity: 0; /* Starts hidden, fades in */
         }
 
-        /* 4. Text Section Styling */
         .text-section {
-            background-color: black;
-            color: white;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 5vw;
             text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
+            width: 100%;
         }
-        .subtext {
-            font-size: 0.5em;
-            display: block;
-            margin-top: 10px;
-        }
+
         .text-content {
+            font-size: 2.5em;
+            line-height: 1.4;
             opacity: 0;
-            transition: opacity 3s ease-in;
+            transition: opacity 1.5s ease;
+            padding: 20px;
+            max-width: 80%;
+            margin: 0 auto;
         }
+
         .text-content.visible {
             opacity: 1;
         }
 
-        /* 5. Photo Stack Styling */
+        /* ==========================================
+           PHOTO SECTION STYLES
+           ========================================== */
         .stack-image {
             position: absolute;
+            width: 70%; 
+            max-height: 80%;
+            object-fit: contain;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 1s ease, transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth CSS transition */
+            /* Initial position offset for effect */
+            transform: translate(-50%, -50%) rotate(0deg) scale(0.9);
             top: 50%;
             left: 50%;
-            max-width: 85vw;
-            max-height: 85vh;
-            width: auto;
-            height: auto;
-
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-            border: 10px solid white;
-            border-radius: 4px;
-
-            /* Initial state: Hidden below screen */
-            transform: translate(-50%, 150vh) rotate(0deg);
-            opacity: 0;
-            /* Transition for the "fly-in" effect */
-            transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
-            pointer-events: none;
         }
+
         .stack-image.visible {
             opacity: 1;
+            /* Final transform is set by JS with random rotation */
         }
         
-        /* ⭐️ NEW VIDEO STYLING ⭐️ */
+        /* ==========================================
+           VIDEO SECTION STYLES
+           ========================================== */
         .video-container {
-            position: absolute;
             width: 100%;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #000; /* Ensure black background behind video */
         }
+        
         #cinematic-video {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Contain the video within the screen */
+            object-fit: contain; /* Ensures the entire video is visible */
             opacity: 0;
             transition: opacity 1s ease-in-out;
-            pointer-events: none;
         }
+        
         #cinematic-video.visible {
             opacity: 1;
         }
-        /* ⭐️ END NEW VIDEO STYLING ⭐️ */
 
-        /* 6. Unmute Overlay Styling */
+
+        /* ==========================================
+           UNMUTE OVERLAY (The Click Handler)
+           ========================================== */
         #unmute-overlay {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.95);
-            z-index: 1000;
             display: flex;
-            flex-direction: column; /* To stack message and spinner */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            transition: opacity 1s ease-out;
-        }
-
-        .unmute-message {
-            color: white;
-            font-size: 3vw;
             text-align: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: opacity 1s ease;
+        }
+
+        #unmute-message {
+            font-size: 1.2em;
+            color: #ccc;
             padding: 20px;
-            border: 3px solid white;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            animation: pulse 1.5s infinite alternate;
-            margin-bottom: 30px; /* Space between message and spinner */
-            /* Ensure the message can change its content width without causing jank */
-            min-width: 40vw; 
+            max-width: 80%;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.9; }
-            100% { transform: scale(1.05); opacity: 1; }
-        }
-
-        /* 7. Spinner CSS (The new hack visual) */
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
+        /* Spinner Animation */
+        #loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
             border-radius: 50%;
-            border-top: 4px solid white;
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             animation: spin 1s linear infinite;
-            display: none; /* Initially hidden */
+            margin-top: 20px;
+            display: none;
         }
-        .spinner.visible {
+        
+        #loading-spinner.visible {
             display: block;
         }
 
@@ -182,23 +155,26 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Pulse Animation for the final ready message */
+        @keyframes pulse {
+            0% { color: #fff; }
+            100% { color: #00ff6a; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="background-container">
-        <div class="background-image"></div>
-    </div>
-
     <div id="content-area">
-    </div>
+        </div>
 
     <div id="unmute-overlay">
-        <div class="unmute-message" id="unmute-message">
-            🔊 Tap to Load Audio and Stabilize Experience (Click 1 of 2)
+        <div id="unmute-message">
+            Tap anywhere to stabilize and preload media (Click 1 of 2) 👆
         </div>
-        <div class="spinner" id="loading-spinner"></div>
+        <div id="loading-spinner"></div>
     </div>
+
     <script>
         // ==========================================
         // 🌟 SECTION CONTROL ARRAY 🌟
@@ -215,10 +191,10 @@
                 type: 'video',
                 content: 'https://reubenivy.github.io/recap_asset/wise_men_say_2.mp4', 
                 duration: 77000, 
-                track: ''
+                track: '' // Video sections DO NOT use the audio track manager
             },
             // ⭐️ END NEW VIDEO SECTION ⭐️
-			{
+            {
                 type: 'text',
                 content: 'THE END',
                 duration: 999999,
@@ -257,7 +233,6 @@
 
         function initializeAudio() {
             // Find all unique track URLs in the page content
-            // NOTE: Only extract audio tracks here.
             allUniqueTracks = [...new Set(pageContent.map(s => s.track).filter(t => t && t.endsWith('.mp3')))];
             
             // Find the video URL for preloading/unlocking
@@ -292,10 +267,8 @@
                     wakeLock = await navigator.wakeLock.request('screen');
                     console.log('Screen Wake Lock acquired.');
                     
-                    // Re-acquire lock if it's released by the OS (e.g., user briefly switches apps)
                     wakeLock.addEventListener('release', () => {
                         console.log('Screen Wake Lock released by system.');
-                        // Note: The system often handles re-acquiring on visibilitychange, but this listener is good practice.
                     });
 
                 } catch (err) {
@@ -345,24 +318,24 @@
         
         /**
          * Loops through all media sequentially to unlock them.
-         * ⭐️ CRITICAL FIX APPLIED HERE: Attaches temporary video to DOM off-screen, then removes it ⭐️
+         * ⭐️ CRITICAL FIX APPLIED HERE: Keeps temp video permanently muted and removes it. ⭐️
          */
         async function runSequentialUnlock() {
             // State 1: Loading
-            unmuteMessage.innerHTML = 'Preloading and stabilizing media...'; // Updated message
-            unmuteMessage.style.animation = 'none'; // Stop pulse
+            unmuteMessage.innerHTML = 'Preloading and stabilizing media...';
+            unmuteMessage.style.animation = 'none';
             loadingSpinner.classList.add('visible');
             
-            // ⭐️ FIX START: Create and configure the temporary video element ⭐️
             let tempVideo = null;
             if (videoUrlToUnlock) {
                 tempVideo = document.createElement('video');
                 tempVideo.src = videoUrlToUnlock;
-                tempVideo.muted = true;
+                // CRITICAL: Must be MUTED here for the silent unlock.
+                tempVideo.muted = true; 
                 tempVideo.preload = 'auto';
                 tempVideo.playsInline = true; 
                 
-                // CRITICAL FIX: Make it invisible and off-screen, but in the DOM
+                // Keep it invisible and off-screen, but in the DOM
                 tempVideo.style.position = 'absolute';
                 tempVideo.style.top = '-10000px'; 
                 tempVideo.style.left = '-10000px'; 
@@ -370,7 +343,7 @@
                 tempVideo.style.height = '1px';
                 tempVideo.style.opacity = '0';
                 
-                document.body.appendChild(tempVideo); // Add to DOM now
+                document.body.appendChild(tempVideo); // Add to DOM
                 console.log("Temporary video element added to DOM off-screen.");
             }
 
@@ -379,12 +352,14 @@
             if (tempVideo) {
                 allMedia.push(tempVideo);
             }
-            // ⭐️ FIX END ⭐️
 
             // CRITICAL STEP A: Force mute all media tracks for silent unlock
             for (const media of allMedia) {
                 if (media) {
-                    media.muted = true; // FORCE MUTE
+                    // Only the actual Audio elements need to be toggled to unmuted=false later
+                    if (media.tagName === 'AUDIO') {
+                        media.muted = true;
+                    }
                 }
             }
 
@@ -398,15 +373,12 @@
             // CRITICAL STEP B: Set final state for media and force pause
             for (const media of allMedia) {
                 if (media) {
-                    media.muted = false; // ALLOW sound on real tracks later
-
-                    // ⭐️ IMPORTANT: Keep the temporary video element permanently muted!
-                    if (media.tagName === 'VIDEO' && media.src === videoUrlToUnlock) {
-                        media.muted = true; 
-                        media.volume = 0;   
+                    // Re-allow sound on real audio tracks (still volume 0)
+                    if (media.tagName === 'AUDIO') {
+                         media.muted = false; 
                     }
                     
-                    // CRITICAL STEP C: Force pause all tracks immediately after unmuting 
+                    // Force pause all tracks immediately
                     media.pause(); 
                     media.currentTime = 0;
                 }
@@ -436,7 +408,7 @@
             // ⭐️ NEW: Stop any playing video before starting a track ⭐️
             if (currentVideo) {
                 currentVideo.pause();
-                currentVideo.remove();
+                currentVideo.remove(); // Also remove the element
                 currentVideo = null;
             }
 
@@ -560,6 +532,7 @@
         
         /**
          * ⭐️ NEW: Render Video Section function 
+         * CRITICAL FIX: Ensure video element is created as Muted. Unmute *only* after successful play().
          */
         function renderVideoSection(videoUrl, duration) {
             contentArea.innerHTML = `
@@ -596,12 +569,13 @@
                 moveToNextSectionSafely();
             }, { once: true });
 
-            // 2. ATTEMPT PLAYBACK WITH SOUND
+            // 2. ATTEMPT PLAYBACK 
             currentVideo.play().then(() => {
-                // Success: Video is playing (either with sound or muted, but unlocked).
-                console.log("Video played successfully.");
+                // Success: Video is playing (it should be muted due to the element attribute).
+                console.log("Video played successfully. Attempting to unmute.");
                 
-                // CRITICAL FIX: Since the video is unlocked from the initial click, aggressively un-mute it.
+                // ⭐️ CRITICAL FIX: Since the video is unlocked by the user's first click, 
+                // the browser *should* now allow the script to unmute it.
                 currentVideo.muted = false; 
                 currentVideo.volume = 1;  
                 
@@ -613,10 +587,10 @@
                 }, duration);
 
             }).catch(error => {
-                // Failure: Should be rare now that media is unlocked, but handle it by forcing mute and trying again.
+                // Failure: If play fails (very rare now), it's a catastrophic error.
                 console.error("Video Autoplay Failed:", error);
-
-                // Re-attempt play muted, relying on the duration timeout.
+                
+                // Attempt muted fallback, just in case, but rely on the timer to move on.
                 currentVideo.muted = true;
                 currentVideo.volume = 0; 
                 
@@ -667,6 +641,7 @@
 
             // --- LOGIC FOR CONTENT TRANSITIONS ---
             let isContinuousSection = false;
+            // The continuity check is likely fine as is for Text -> Photos, but ensure it doesn't run during Video transition
             if (currentSectionIndex > 0 && previousSection && previousSection.type === 'text' && section.type === 'photos' && previousSection.track === section.track) {
                 isContinuousSection = true;
             }
