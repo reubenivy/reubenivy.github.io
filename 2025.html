@@ -345,6 +345,7 @@
         
         /**
          * Loops through all media sequentially to unlock them.
+         * ⭐️ FIX APPLIED HERE: Ensures temporary video element is not in DOM, is playsInline, AND is permanently muted ⭐️
          */
         async function runSequentialUnlock() {
             // State 1: Loading
@@ -352,20 +353,23 @@
             unmuteMessage.style.animation = 'none'; // Stop pulse
             loadingSpinner.classList.add('visible');
             
-            // ⭐️ NEW: Create a temporary video element for the unlock hack ⭐️
-            const tempVideo = document.createElement('video');
+            // ⭐️ FIX START: Create the temporary video element inside the function but OUTSIDE the DOM ⭐️
+            let tempVideo = null;
             if (videoUrlToUnlock) {
+                tempVideo = document.createElement('video');
                 tempVideo.src = videoUrlToUnlock;
                 tempVideo.muted = true;
                 tempVideo.preload = 'auto';
+                tempVideo.playsInline = true; // Crucial for preventing fullscreen/player popup
             }
 
             // Combine audio and video elements
             let allMedia = [...allUniqueTracks.map(url => audioMap[url])];
-            if (videoUrlToUnlock) {
+            if (tempVideo) {
                 allMedia.push(tempVideo);
             }
-            
+            // ⭐️ FIX END ⭐️
+
             // CRITICAL STEP A: Force mute all media tracks for silent unlock
             for (const media of allMedia) {
                 if (media) {
@@ -380,16 +384,22 @@
                 }
             }
             
-            // CRITICAL STEP B: Un-mute all media tracks
+            // CRITICAL STEP B: Un-mute all media tracks (and ensure temp video stays muted)
             for (const media of allMedia) {
                 if (media) {
                     media.muted = false; // ALLOW SOUND (still volume 0)
+
+                    // ⭐️ NEW FIX: Keep the temporary video element permanently muted!
+                    if (media.tagName === 'VIDEO' && media.src === videoUrlToUnlock) {
+                        media.muted = true; // Permanent mute for the hack element
+                        media.volume = 0;   // Ensure no volume
+                    }
                 }
             }
             
-            // ⭐ CRITICAL FIX FOR AUTOPLAY ⭐
+            // ⭐ CRITICAL FIX FOR AUTOPLAY AND POPUP ⭐
             // CRITICAL STEP C: Force pause all tracks immediately after unmuting 
-             for (const media of allMedia) {
+            for (const media of allMedia) {
                 if (media) {
                     media.pause(); 
                     media.currentTime = 0;
@@ -536,7 +546,10 @@
             });
         }
         
-        // ⭐️ NEW: Render Video Section function - FIX APPLIED HERE ⭐️
+        /**
+         * ⭐️ NEW: Render Video Section function 
+         * FIX APPLIED HERE: Aggressively attempts to un-mute after successful play ⭐️
+         */
         function renderVideoSection(videoUrl, duration) {
             contentArea.innerHTML = `
                 <div class="video-container">
@@ -554,20 +567,15 @@
             currentVideo = document.getElementById('cinematic-video');
             currentVideo.classList.add('visible');
             
-            // Fallback timeout ID, for non-video sections
             let videoTimeoutId = null;
-
-            // Use a flag to prevent nextSection() from running twice
             let hasMovedToNextSection = false;
 
             function moveToNextSectionSafely() {
                 if (hasMovedToNextSection) return;
                 hasMovedToNextSection = true;
                 
-                // Ensure any timeouts are cleared
                 if (videoTimeoutId) clearTimeout(videoTimeoutId);
                 
-                // The main flow control handles index checking and cleanup.
                 nextSection(); 
             }
 
@@ -579,13 +587,14 @@
 
             // 2. ATTEMPT PLAYBACK WITH SOUND
             currentVideo.play().then(() => {
-                // Success: Video is playing with sound (if browser allows).
-                console.log("Video played successfully with sound.");
-                currentVideo.muted = false; // Unmute it, as we started it muted in the HTML
-                currentVideo.volume = 1;  
+                // Success: Video is playing (either with sound or muted, but unlocked).
+                console.log("Video played successfully.");
+                
+                // CRITICAL FIX: Since the video is unlocked from the initial click, aggressively un-mute it.
+                currentVideo.muted = false; 
+                currentVideo.volume = 1;  
                 
                 // 3. FALLBACK TIMEOUT: If 'ended' event doesn't fire or video stops/fails silently.
-                // We still need the long duration timeout for a normal video end.
                 videoTimeoutId = setTimeout(() => {
                     console.warn("Video duration timeout reached. Moving to next section (Fallback).");
                     if (currentVideo) currentVideo.pause();
@@ -593,22 +602,20 @@
                 }, duration);
 
             }).catch(error => {
-                // Failure: Browser policy prevented autoplay with sound.
-                console.error("Video Autoplay Failed (with sound):", error);
+                // Failure: Should be rare now that media is unlocked, but handle it by forcing mute and trying again.
+                console.error("Video Autoplay Failed:", error);
 
-                // OPTION 1: Attempt to proceed muted (it should already be muted from HTML, but let's confirm)
+                // Re-attempt play muted, relying on the duration timeout.
                 currentVideo.muted = true;
-                currentVideo.volume = 0; // Ensure no sound is accidentally played
+                currentVideo.volume = 0; 
                 
-                // Attempt play again (it should work muted)
                 currentVideo.play().then(() => {
                     console.log("Video is playing successfully (Muted Fallback).");
-                    // We use a short, 1-second timeout as a visual-only element, then move on.
                     videoTimeoutId = setTimeout(() => {
-                        console.warn("Muted video fallback timeout reached. Moving to next section.");
+                        console.warn("Muted video fallback duration timeout reached. Moving to next section.");
                         if (currentVideo) currentVideo.pause();
                         moveToNextSectionSafely();
-                    }, 1000); // Wait 1 second before proceeding
+                    }, duration); 
                 }).catch(e => {
                     // Catastrophic Failure: Cannot play even muted. Immediately move on.
                     console.error("Video Autoplay Failed, even muted. Skipping section.", e);
