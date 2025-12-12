@@ -3,151 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cinematic Story</title>
+    <title>Cinematic Photo Stack Story</title>
     <style>
-        /* ==========================================
-           CSS RESET AND BODY STYLES
-           ========================================== */
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #000;
-            color: #fff;
+        /* 1. Base Setup */
+        body, html {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            user-select: none;
-            touch-action: manipulation;
-            position: relative;
+            font-family: 'Georgia', serif;
+            background-color: #000; /* Added for completeness */
         }
 
-        /* ==========================================
-           CONTENT AREA AND TEXT SECTIONS
-           ========================================== */
+        /* 2. Background and Section Container */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+        .background-image {
+            width: 100%;
+            height: 100%;
+            background-image: url('https://reubenivy.github.io/moments/5_apr_2025_5.jpg');
+            background-size: cover;
+            background-position: center;
+            animation: breathe 20s ease-in-out infinite alternate;
+        }
+        @keyframes breathe {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15); } /* Slow zoom-in effect */
+        }
+
+        /* 3. Full-Screen Content Area */
         #content-area {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 800px;
-            height: 90vh;
-            max-height: 900px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 1s ease-in-out;
-            opacity: 0; /* Starts hidden, fades in */
-        }
-
-        .text-section {
-            text-align: center;
-            width: 100%;
-        }
-
-        .text-content {
-            font-size: 2.5em;
-            line-height: 1.4;
-            opacity: 0;
-            transition: opacity 1.5s ease;
-            padding: 20px;
-            max-width: 80%;
-            margin: 0 auto;
-        }
-
-        .text-content.visible {
-            opacity: 1;
-        }
-
-        /* ==========================================
-           PHOTO SECTION STYLES
-           ========================================== */
-        .stack-image {
-            position: absolute;
-            width: 70%; 
-            max-height: 80%;
-            object-fit: contain;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            opacity: 0;
-            transition: opacity 1s ease, transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth CSS transition */
-            /* Initial position offset for effect */
-            transform: translate(-50%, -50%) rotate(0deg) scale(0.9);
-            top: 50%;
-            left: 50%;
-        }
-
-        .stack-image.visible {
-            opacity: 1;
-            /* Final transform is set by JS with random rotation */
-        }
-        
-        /* ==========================================
-           VIDEO SECTION STYLES
-           ========================================== */
-        .video-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        #cinematic-video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* Ensures the entire video is visible */
-            opacity: 0;
-            transition: opacity 1s ease-in-out;
-        }
-        
-        #cinematic-video.visible {
-            opacity: 1;
-        }
-
-
-        /* ==========================================
-           UNMUTE OVERLAY (The Click Handler)
-           ========================================== */
-        #unmute-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            pointer-events: none;
+            transition: opacity 1s ease-in-out;
+            opacity: 0;
+            z-index: 10;
+        }
+
+        /* 4. Text Section Styling */
+        .text-section {
+            background-color: black;
+            color: white;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5vw;
             text-align: center;
-            cursor: pointer;
-            z-index: 1000;
-            transition: opacity 1s ease;
-        }
-
-        #unmute-message {
-            font-size: 1.2em;
-            color: #ccc;
             padding: 20px;
-            max-width: 80%;
+            box-sizing: border-box;
+        }
+        .subtext {
+            font-size: 0.5em;
+            display: block;
+            margin-top: 10px;
+        }
+        .text-content {
+            opacity: 0;
+            transition: opacity 3s ease-in;
+        }
+        .text-content.visible {
+            opacity: 1;
         }
 
-        /* Spinner Animation */
-        #loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #007bff;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin-top: 20px;
-            display: none;
+        /* 5. Photo Stack Styling */
+        .stack-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            max-width: 85vw;
+            max-height: 85vh;
+            width: auto;
+            height: auto;
+
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border: 10px solid white;
+            border-radius: 4px;
+
+            /* Initial state: Hidden below screen */
+            transform: translate(-50%, 150vh) rotate(0deg);
+            opacity: 0;
+            /* Transition for the "fly-in" effect */
+            transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+            pointer-events: none;
+        }
+        .stack-image.visible {
+            opacity: 1;
         }
         
-        #loading-spinner.visible {
+        /* ⭐️ NEW VIDEO STYLING ⭐️ */
+        .video-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column; /* Added for mobile button stacking */
+            justify-content: center;
+            align-items: center;
+            background-color: #000; /* Ensure black background behind video */
+        }
+        #cinematic-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Contain the video within the screen */
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            pointer-events: none;
+        }
+        #cinematic-video.visible {
+            opacity: 1;
+             pointer-events: auto; /* Allow interaction while visible */
+        }
+        /* ⭐️ END NEW VIDEO STYLING ⭐️ */
+
+        /* ⭐️ NEW VIDEO PLAY BUTTON STYLING (Required for mobile) ⭐️ */
+        #mobile-video-button {
+            /* Basic styling for visibility, will be positioned by video-container */
+            background-color: #e50914; /* Netflix Red */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5em;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.1s;
+            z-index: 20;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+        }
+        #mobile-video-button:hover {
+            background-color: #f40612;
+        }
+        #mobile-video-button:active {
+            transform: scale(0.98);
+        }
+        /* ⭐️ END NEW VIDEO PLAY BUTTON STYLING ⭐️ */
+
+        /* 6. Unmute Overlay Styling */
+        #unmute-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column; /* To stack message and spinner */
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 1s ease-out;
+        }
+
+        .unmute-message {
+            color: white;
+            font-size: 3vw;
+            min-height: 1.5em;
+            text-align: center;
+            padding: 20px;
+            border: 3px solid white;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            animation: pulse 1.5s infinite alternate;
+            margin-bottom: 30px; /* Space between message and spinner */
+            min-width: 40vw; 
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+
+        /* 7. Spinner CSS (The new hack visual) */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: none; /* Initially hidden */
+        }
+        .spinner.visible {
             display: block;
         }
 
@@ -155,26 +208,23 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* Pulse Animation for the final ready message */
-        @keyframes pulse {
-            0% { color: #fff; }
-            100% { color: #00ff6a; }
-        }
     </style>
 </head>
 <body>
 
-    <div id="content-area">
-        </div>
-
-    <div id="unmute-overlay">
-        <div id="unmute-message">
-            Tap anywhere to stabilize and preload media (Click 1 of 2) 👆
-        </div>
-        <div id="loading-spinner"></div>
+    <div class="background-container">
+        <div class="background-image"></div>
     </div>
 
+    <div id="content-area">
+    </div>
+
+    <div id="unmute-overlay">
+        <div class="unmute-message" id="unmute-message">
+            🔊 Tap to Load Audio and Stabilize Experience (Click 1 of 2)
+        </div>
+        <div class="spinner" id="loading-spinner"></div>
+    </div>
     <script>
         // ==========================================
         // 🌟 SECTION CONTROL ARRAY 🌟
@@ -186,14 +236,14 @@
                 duration: 7500,
                 track: ''
             },
-            // ⭐️ NEW VIDEO SECTION ADDED ⭐️
+            // ⭐️ VIDEO SECTION ⭐️
             {
                 type: 'video',
                 content: 'https://reubenivy.github.io/recap_asset/wise_men_say_2.mp4', 
                 duration: 77000, 
-                track: '' // Video sections DO NOT use the audio track manager
+                track: ''
             },
-            // ⭐️ END NEW VIDEO SECTION ⭐️
+            // ⭐️ END VIDEO SECTION ⭐️
             {
                 type: 'text',
                 content: 'THE END',
@@ -211,6 +261,10 @@
         const CROSSFADE_INTERVAL = CROSSFADE_DURATION / CROSSFADE_STEPS;
         const VOLUME_STEP = 1 / CROSSFADE_STEPS;
         const INITIAL_DELAY_AFTER_UNLOCK = 500;
+        
+        // ⭐️ NEW: Browser Detection (Determines video preload and rendering) ⭐️
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        console.log("Is Mobile Device:", isMobile);
 
         // 🌟 WAKE LOCK VARIABLE 🌟
         let wakeLock = null; 
@@ -227,21 +281,17 @@
 
         const audioMap = {};
         let allUniqueTracks = [];
-        // ⭐️ NEW: Separate collection for video URL ⭐️
         let videoUrlToUnlock = null;
 
 
         function initializeAudio() {
-            // Find all unique track URLs in the page content
             allUniqueTracks = [...new Set(pageContent.map(s => s.track).filter(t => t && t.endsWith('.mp3')))];
             
-            // Find the video URL for preloading/unlocking
             const videoSection = pageContent.find(s => s.type === 'video');
             if (videoSection) {
                 videoUrlToUnlock = videoSection.content;
             }
 
-            // Create Audio objects for each unique track
             allUniqueTracks.forEach(trackUrl => {
                 const audio = new Audio(trackUrl);
                 audio.loop = true;
@@ -256,11 +306,8 @@
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // --- WAKE LOCK FUNCTIONS (Unchanged) ---
+        // --- WAKE LOCK FUNCTIONS ---
 
-        /**
-         * 🔒 Attempts to acquire a Screen Wake Lock.
-         */
         async function requestWakeLock() {
             if ('wakeLock' in navigator) {
                 try {
@@ -270,7 +317,6 @@
                     wakeLock.addEventListener('release', () => {
                         console.log('Screen Wake Lock released by system.');
                     });
-
                 } catch (err) {
                     console.error(`Wake Lock error: ${err.name}, ${err.message}`);
                 }
@@ -279,9 +325,6 @@
             }
         }
 
-        /**
-         * 🔓 Attempts to release the Screen Wake Lock.
-         */
         function releaseWakeLock() {
             if (wakeLock) {
                 wakeLock.release()
@@ -295,16 +338,11 @@
             }
         }
         
-        // --- AUDIO/VIDEO UNLOCK FUNCTIONS (Modified to include video) ---
+        // --- AUDIO/VIDEO UNLOCK FUNCTIONS (Conditional Preload) ---
 
-        /**
-         * HACK: Sequentially plays and immediately pauses a single media track.
-         */
         function unlockTrackSequentially(mediaElement) {
             return new Promise(resolve => {
                 if (!mediaElement) return resolve();
-
-                // Play the track. Since 'muted' is true, this is silent.
                 mediaElement.play().then(() => {
                     mediaElement.pause();
                     mediaElement.currentTime = 0;
@@ -317,86 +355,73 @@
         }
         
         /**
-         * Loops through all media sequentially to unlock them.
-         * ⭐️ CRITICAL FIX APPLIED HERE: Keeps temp video permanently muted and removes it. ⭐️
+         * Conditional logic: Only unlocks video on Desktop. 
+         * Mobile only unlocks audio to avoid native player hijack.
          */
         async function runSequentialUnlock() {
-            // State 1: Loading
             unmuteMessage.innerHTML = 'Preloading and stabilizing media...';
             unmuteMessage.style.animation = 'none';
             loadingSpinner.classList.add('visible');
             
             let tempVideo = null;
-            if (videoUrlToUnlock) {
+            let allMedia = [...allUniqueTracks.map(url => audioMap[url])];
+
+            // ⭐️ CRITICAL MOBILE CHECK: Only preload video on Desktop ⭐️
+            if (!isMobile && videoUrlToUnlock) {
                 tempVideo = document.createElement('video');
                 tempVideo.src = videoUrlToUnlock;
-                // CRITICAL: Must be MUTED here for the silent unlock.
                 tempVideo.muted = true; 
                 tempVideo.preload = 'auto';
                 tempVideo.playsInline = true; 
                 
-                // Keep it invisible and off-screen, but in the DOM
                 tempVideo.style.position = 'absolute';
                 tempVideo.style.top = '-10000px'; 
                 tempVideo.style.left = '-10000px'; 
-                tempVideo.style.width = '1px';
-                tempVideo.style.height = '1px';
-                tempVideo.style.opacity = '0';
+                document.body.appendChild(tempVideo);
+                console.log("Desktop Mode: Temporary video element added to DOM for unlock.");
                 
-                document.body.appendChild(tempVideo); // Add to DOM
-                console.log("Temporary video element added to DOM off-screen.");
-            }
-
-            // Combine audio and video elements
-            let allMedia = [...allUniqueTracks.map(url => audioMap[url])];
-            if (tempVideo) {
                 allMedia.push(tempVideo);
+            } else if (isMobile && videoUrlToUnlock) {
+                console.log("Mobile Mode: Skipping video preload/unlock on first click.");
             }
 
-            // CRITICAL STEP A: Force mute all media tracks for silent unlock
+            // Force mute all media tracks for silent unlock
             for (const media of allMedia) {
                 if (media) {
-                    // Only the actual Audio elements need to be toggled to unmuted=false later
-                    if (media.tagName === 'AUDIO') {
-                        media.muted = true;
-                    }
+                    media.muted = true;
                 }
             }
 
-            // Perform the sequential unlock
+            // Perform the sequential unlock (Audio only on Mobile)
             for (const media of allMedia) {
                 if (media) {
                     await unlockTrackSequentially(media);
                 }
             }
             
-            // CRITICAL STEP B: Set final state for media and force pause
+            // Set final state and force pause/reset
             for (const media of allMedia) {
                 if (media) {
-                    // Re-allow sound on real audio tracks (still volume 0)
                     if (media.tagName === 'AUDIO') {
-                         media.muted = false; 
+                         media.muted = false; // Allow sound on real audio tracks
                     }
                     
-                    // Force pause all tracks immediately
                     media.pause(); 
                     media.currentTime = 0;
                 }
             }
             
-            // ⭐️ FINAL CRITICAL STEP: Remove the temporary video element from the DOM ⭐️
+            // Remove the temporary video element on Desktop 
             if (tempVideo && document.body.contains(tempVideo)) {
                 document.body.removeChild(tempVideo);
-                console.log("Temporary video element removed from DOM.");
+                console.log("Desktop Mode: Temporary video element removed from DOM.");
             }
-
 
             // State 2: Ready
             unmuteMessage.innerHTML = '✅ Loading Complete. Tap to Begin Story 🎬 (Click 2 of 2)';
             unmuteMessage.style.animation = 'pulse 1.5s infinite alternate';
             loadingSpinner.classList.remove('visible');
             
-            // Re-enable the click handler for the second step
             unmuteOverlay.addEventListener('click', startCinematicStorySequence, { once: true });
         }
 
@@ -405,14 +430,12 @@
         function playTrack(filename) {
             const previousAudio = currentAudio;
 
-            // ⭐️ NEW: Stop any playing video before starting a track ⭐️
             if (currentVideo) {
-                currentVideo.pause();
-                currentVideo.remove(); // Also remove the element
+                const videoElement = document.getElementById('cinematic-video');
+                if(videoElement) videoElement.remove();
                 currentVideo = null;
             }
 
-            // Get the preloaded audio element
             const newAudio = audioMap[filename];
             if (!newAudio) {
                 if (previousAudio) {
@@ -430,9 +453,8 @@
 
             currentAudio = newAudio;
             
-            // Start playing the new audio, it is unblocked, unmuted, and at volume 0
             newAudio.play().then(() => {
-                // Play started successfully, proceed with fade logic
+                // Play started successfully
             }).catch(error => {
                 console.error(`Playback error on track switch for ${filename}:`, error);
             });
@@ -442,25 +464,20 @@
 
                 const crossfadeTimer = setInterval(() => {
                     currentStep++;
-
-                    // 1. Fade OLD track out
                     if (previousAudio.volume > VOLUME_STEP) {
                         previousAudio.volume -= VOLUME_STEP;
                     } else {
                         previousAudio.volume = 0;
                     }
 
-                    // 2. Fade NEW track in
                     if (newAudio.volume < 1 - VOLUME_STEP) {
                         newAudio.volume += VOLUME_STEP;
                     } else {
                         newAudio.volume = 1;
                     }
 
-                    // 3. Stop when fade is complete
                     if (currentStep >= CROSSFADE_STEPS) {
                         clearInterval(crossfadeTimer);
-                        // Ensure old track is completely stopped and reset
                         previousAudio.pause();
                         previousAudio.volume = 0;
                         previousAudio.currentTime = 0; 
@@ -468,7 +485,6 @@
                 }, CROSSFADE_INTERVAL);
 
             } else {
-                // First track: simple fade-in
                 let currentVolume = 0;
                 const fadeInTimer = setInterval(() => {
                     currentVolume += VOLUME_STEP;
@@ -490,10 +506,9 @@
                     <div class="text-content" id="fading-text">${text}</div>
                 </div>
             `;
-            // ⭐️ NEW: Clean up any playing video ⭐️
             if (currentVideo) {
-                currentVideo.pause();
-                currentVideo.remove(); // Also remove the element
+                const videoElement = document.getElementById('cinematic-video');
+                if(videoElement) videoElement.remove();
                 currentVideo = null;
             }
             setTimeout(() => {
@@ -503,10 +518,9 @@
 
         function renderPhotoSection(imageUrls, delayMs) {
             contentArea.innerHTML = '';
-            // ⭐️ NEW: Clean up any playing video ⭐️
             if (currentVideo) {
-                currentVideo.pause();
-                currentVideo.remove(); // Also remove the element
+                const videoElement = document.getElementById('cinematic-video');
+                if(videoElement) videoElement.remove();
                 currentVideo = null;
             }
 
@@ -531,23 +545,24 @@
         }
         
         /**
-         * ⭐️ NEW: Render Video Section function 
-         * CRITICAL FIX: Ensure video element is created as Muted. Unmute *only* after successful play().
+         * ⭐️ CRITICAL RENDER: Handles Desktop autoplay vs Mobile button. ⭐️
          */
         function renderVideoSection(videoUrl, duration) {
-            contentArea.innerHTML = `
-                <div class="video-container">
-                    <video id="cinematic-video" src="${videoUrl}" autoplay playsinline preload="auto" muted></video>
-                </div>
-            `;
-            
-            // Stop current audio (no crossfade, immediate stop)
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.volume = 0;
                 currentAudio = null;
             }
-
+            
+            contentArea.innerHTML = `
+                <div class="video-container">
+                    <video id="cinematic-video" src="${videoUrl}" playsinline preload="${isMobile ? 'metadata' : 'auto'}" muted></video>
+                    <button id="mobile-video-button" style="display: ${isMobile ? 'block' : 'none'};">
+                        ▶️ Click to Play Video and Sound
+                    </button>
+                </div>
+            `;
+            
             currentVideo = document.getElementById('cinematic-video');
             currentVideo.classList.add('visible');
             
@@ -563,66 +578,76 @@
                 nextSection(); 
             }
 
-            // 1. ADD ENDED LISTENER: Move to the next section when the video completes.
+            // 1. ADD ENDED LISTENER
             currentVideo.addEventListener('ended', function handleVideoEnd() {
                 console.log("Video playback ended. Moving to next section.");
                 moveToNextSectionSafely();
             }, { once: true });
-
-            // 2. ATTEMPT PLAYBACK 
-            currentVideo.play().then(() => {
-                // Success: Video is playing (it should be muted due to the element attribute).
-                console.log("Video played successfully. Attempting to unmute.");
-                
-                // ⭐️ CRITICAL FIX: Since the video is unlocked by the user's first click, 
-                // the browser *should* now allow the script to unmute it.
-                currentVideo.muted = false; 
-                currentVideo.volume = 1;  
-                
-                // 3. FALLBACK TIMEOUT: If 'ended' event doesn't fire or video stops/fails silently.
-                videoTimeoutId = setTimeout(() => {
-                    console.warn("Video duration timeout reached. Moving to next section (Fallback).");
-                    if (currentVideo) currentVideo.pause();
-                    moveToNextSectionSafely();
-                }, duration);
-
-            }).catch(error => {
-                // Failure: If play fails (very rare now), it's a catastrophic error.
-                console.error("Video Autoplay Failed:", error);
-                
-                // Attempt muted fallback, just in case, but rely on the timer to move on.
-                currentVideo.muted = true;
-                currentVideo.volume = 0; 
-                
-                currentVideo.play().then(() => {
-                    console.log("Video is playing successfully (Muted Fallback).");
+            
+            // 2. Define the main playback function (used by both Desktop autoplay and Mobile button click)
+            function startVideoPlayback() {
+                 const mobileButton = document.getElementById('mobile-video-button');
+                 if(mobileButton) mobileButton.style.display = 'none';
+                 
+                 // CRITICAL: Start the play attempt. On mobile, this is the user click.
+                 currentVideo.play().then(() => {
+                    console.log("Video played successfully. Attempting to unmute.");
+                    currentVideo.muted = false; // This is allowed because of the direct user click/interaction
+                    currentVideo.volume = 1;  
+                    
                     videoTimeoutId = setTimeout(() => {
-                        console.warn("Muted video fallback duration timeout reached. Moving to next section.");
+                        console.warn("Video duration timeout reached. Moving to next section (Fallback).");
                         if (currentVideo) currentVideo.pause();
                         moveToNextSectionSafely();
-                    }, duration); 
-                }).catch(e => {
-                    // Catastrophic Failure: Cannot play even muted. Immediately move on.
-                    console.error("Video Autoplay Failed, even muted. Skipping section.", e);
-                    moveToNextSectionSafely();
+                    }, duration);
+
+                }).catch(error => {
+                    console.error("Video Autoplay Failed:", error);
+                    
+                    // Fallback to muted, short playback
+                    currentVideo.muted = true;
+                    currentVideo.volume = 0; 
+                    
+                    currentVideo.play().then(() => {
+                        console.log("Video is playing successfully (Muted Fallback).");
+                        videoTimeoutId = setTimeout(() => {
+                            console.warn("Muted video fallback timeout reached. Moving to next section.");
+                            if (currentVideo) currentVideo.pause();
+                            moveToNextSectionSafely();
+                        }, 1000); 
+                    }).catch(e => {
+                        console.error("Video Autoplay Failed, even muted. Skipping section.", e);
+                        moveToNextSectionSafely();
+                    });
                 });
-            });
+            }
+
+            // 3. Conditional Start Logic
+            if (isMobile) {
+                // Mobile: Wait for the user to click the third button
+                const mobileButton = document.getElementById('mobile-video-button');
+                if (mobileButton) {
+                    mobileButton.addEventListener('click', startVideoPlayback, { once: true });
+                }
+            } else {
+                // Desktop: Auto-play immediately
+                startVideoPlayback();
+            }
         }
 
 
-        // Main Flow Control (Modified for video)
+        // Main Flow Control (Unchanged)
         function nextSection() {
             if (currentSectionIndex >= pageContent.length) {
-                // STORY ENDED
                 if (currentAudio) {
                     currentAudio.pause();
                     currentAudio.volume = 0;
                 }
-                // ⭐️ NEW: Stop video on story end ⭐️
                 if (currentVideo) {
                     currentVideo.pause();
+                    const videoElement = document.getElementById('cinematic-video');
+                    if(videoElement) videoElement.remove();
                 }
-                // 🔓 RELEASE THE WAKE LOCK WHEN THE STORY IS OVER
                 releaseWakeLock(); 
                 return;
             }
@@ -630,7 +655,6 @@
             const section = pageContent[currentSectionIndex];
             const previousSection = pageContent[currentSectionIndex - 1];
 
-            // 1. Play the new track (Crossfade Logic) - ONLY if it's an audio track and NOT a video section
             if (section.type !== 'video' && section.track) {
                 playTrack(section.track);
             } else if (section.type !== 'video' && currentAudio) {
@@ -639,42 +663,31 @@
                 currentAudio = null; 
             }
 
-            // --- LOGIC FOR CONTENT TRANSITIONS ---
             let isContinuousSection = false;
-            // The continuity check is likely fine as is for Text -> Photos, but ensure it doesn't run during Video transition
             if (currentSectionIndex > 0 && previousSection && previousSection.type === 'text' && section.type === 'photos' && previousSection.track === section.track) {
                 isContinuousSection = true;
             }
 
-            // 2. Determine if we need to fade out previous content
             if (!isContinuousSection) {
                 contentArea.style.opacity = 0;
             }
 
-            // 3. Set the delay based on continuity
             const renderDelay = isContinuousSection ? 50 : 1000;
 
             setTimeout(() => {
-
-                // 4. Render new content
                 if (section.type === 'text') {
                     renderTextSection(section.content);
                 } else if (section.type === 'photos') {
                     const photoDelay = section.photoDelay || 3000;
                     renderPhotoSection(section.content, photoDelay);
                 } else if (section.type === 'video') {
-                    // ⭐️ NEW VIDEO RENDER ⭐️
                     renderVideoSection(section.content, section.duration);
                 }
 
-                // 5. Fade new content in
                 contentArea.style.opacity = 1;
 
-                // 6. Set timer for the next section
                 currentSectionIndex++;
                 
-                // CRITICAL FIX: Only set the timeout for non-video sections.
-                // Video section manages its own flow control via the 'ended' event/fallback timer.
                 if (section.type !== 'video' && section.duration < 999999) {
                     setTimeout(nextSection, section.duration);
                 }
@@ -688,13 +701,12 @@
         function startCinematicStorySequence() {
             unmuteOverlay.style.opacity = 0;
             
-            // 🔒 REQUEST THE WAKE LOCK HERE (Triggered by Click 2)
             requestWakeLock();
 
             setTimeout(() => {
                 unmuteOverlay.style.display = 'none';
                 nextSection();
-            }, 1000 + INITIAL_DELAY_AFTER_UNLOCK); // Wait for fade-out + buffer
+            }, 1000 + INITIAL_DELAY_AFTER_UNLOCK);
         }
 
         // Step 1: Initiated by the *very first* user click.
@@ -702,25 +714,18 @@
             if (hasStarted) return;
             hasStarted = true; 
 
-            // IMPORTANT: Remove the click handler immediately to prevent accidental second click
             unmuteOverlay.removeEventListener('click', handleFirstTap);
 
-            // CRITICAL: We run the sequential unlock, which manages the visual feedback (spinner/text change).
             runSequentialUnlock();
         }
 
         window.onload = function() {
             initializeAudio(); 
-            // The first click runs the unlock process (handleFirstTap)
             unmuteOverlay.addEventListener('click', handleFirstTap, { once: true });
             
-            // ⚠️ Add event listener to handle Wake Lock if user navigates away and comes back
             document.addEventListener('visibilitychange', () => {
                 if (wakeLock !== null && document.visibilityState === 'visible') {
-                    // Try to re-acquire the lock if it was lost when hidden
                     requestWakeLock();
-                } else if (document.visibilityState === 'hidden' && wakeLock) {
-                    // The system often automatically releases the lock when hidden, but the API handles re-acquiring.
                 }
             });
         };
