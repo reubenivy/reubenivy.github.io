@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cinematic Photo Stack Story</title>
     <style>
+        /* CSS is unchanged */
         /* 1. Base Setup */
         body, html {
             margin: 0;
@@ -369,6 +370,7 @@
         const CROSSFADE_STEPS = 50;
         const CROSSFADE_INTERVAL = CROSSFADE_DURATION / CROSSFADE_STEPS;
         const VOLUME_STEP = 1 / CROSSFADE_STEPS;
+        const INITIAL_DELAY_AFTER_UNLOCK = 500; // Small delay to allow the browser's main thread to clear after the tap/unlock.
 
         const contentArea = document.getElementById('content-area');
         const unmuteOverlay = document.getElementById('unmute-overlay');
@@ -401,11 +403,36 @@
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
+        // *** CRITICAL FIX FUNCTION: SILENT WEB AUDIO API UNLOCK ***
+        function silentAudioUnlock() {
+            // Check for Web Audio API support
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return false;
+
+            const context = new AudioContext();
+            
+            // Create a silent buffer source to play
+            const source = context.createBufferSource();
+            source.buffer = context.createBuffer(1, 1, 22050); // 1 sample of silence
+            source.connect(context.destination);
+            
+            // Start playing the silent sound, which grants audio permission
+            source.start(0);
+
+            // Clean up when done, just in case
+            source.onended = () => {
+                source.disconnect(context.destination);
+                context.close();
+            };
+            return true;
+        }
+        // *********************************************************
+
+
         // 🎶 Music Crossfade Logic 🎶 (Unchanged)
         function playTrack(filename) {
             const previousAudio = currentAudio;
 
-            // Get the preloaded audio element
             const newAudio = audioMap[filename];
             if (!newAudio) return; 
 
@@ -415,7 +442,7 @@
 
             currentAudio = newAudio;
             
-            // Start playing the new audio (it is already unblocked from the initial tap)
+            // Start playing the new audio (it is now unlocked silently)
             newAudio.play().catch(error => {
                 console.error(`Playback error for ${filename}:`, error);
             });
@@ -550,41 +577,26 @@
             }, renderDelay);
         }
 
-        // ⚡️ INITIALIZATION LOGIC (THE FIX IS HERE) ⚡️
+        // ⚡️ INITIALIZATION LOGIC (SIMPLIFIED AND CLEANED) ⚡️
         function startCinematicStory() {
             if (hasStarted) return;
             hasStarted = true;
 
-            // 1. Unblock and IMMEDIATELY silence and reset ALL audio tracks
-            allUniqueTracks.forEach(trackUrl => {
-                const audio = audioMap[trackUrl];
-                if (audio) {
-                    // CRITICAL FIX: The audio object starts at volume 0 (from initializeAudio). 
-                    // This means the brief play() call will be silent.
-                    
-                    audio.play().then(() => {
-                        // Success: Audio is unblocked. Now, stop it completely.
-                        audio.pause(); 
-                        audio.currentTime = 0; 
-                        
-                        // NOTE: We do NOT need to reset volume here. 
-                        // The nextSection -> playTrack logic will handle the fade-in from 0 to 1.
-
-                    }).catch(e => {
-                        console.error("Error unblocking audio:", e);
-                    });
-                }
-            });
+            // 1. **CRITICAL:** Unlock audio using the silent Web Audio API method
+            silentAudioUnlock();
             
-            // 2. Wait for fade-out of overlay
+            // 2. Fade out overlay
             unmuteOverlay.style.opacity = 0;
+            
+            // 3. Wait for fade-out and a small buffer time (INITIAL_DELAY_AFTER_UNLOCK)
+            // This ensures the browser is completely ready after the user tap.
             setTimeout(() => {
                 unmuteOverlay.style.display = 'none';
 
-                // 3. Start the entire sequence
+                // 4. Start the sequence
                 nextSection();
 
-            }, 1000); // Wait for the 1s CSS fade-out transition
+            }, 1000 + INITIAL_DELAY_AFTER_UNLOCK); // 1000ms (CSS fade) + 500ms (buffer)
         }
 
         window.onload = function() {
