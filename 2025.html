@@ -54,7 +54,7 @@
             z-index: 10;
         }
 
-        /* 4. Text Section Styling (Black and White Movie Title Effect) */
+        /* 4. Text Section Styling */
         .text-section {
             background-color: black;
             color: white;
@@ -75,7 +75,7 @@
         }
         .text-content {
             opacity: 0;
-            transition: opacity 3s ease-in; /* Slow fade-in for the text */
+            transition: opacity 3s ease-in;
         }
         .text-content.visible {
             opacity: 1;
@@ -113,13 +113,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.95); /* Semi-transparent dark overlay */
-            z-index: 1000; /* Ensure it's on top of everything */
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
             display: flex;
+            flex-direction: column; /* To stack message and spinner */
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: opacity 1s ease-out; /* Smooth fade-out */
+            transition: opacity 1s ease-out;
         }
 
         .unmute-message {
@@ -128,13 +129,35 @@
             text-align: center;
             padding: 20px;
             border: 3px solid white;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); /* Glowing border effect */
-            animation: pulse 1.5s infinite alternate; /* Gentle blinking effect */
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            animation: pulse 1.5s infinite alternate;
+            margin-bottom: 30px; /* Space between message and spinner */
+            /* Ensure the message can change its content width without causing jank */
+            min-width: 40vw; 
         }
 
         @keyframes pulse {
             0% { transform: scale(1); opacity: 0.9; }
             100% { transform: scale(1.05); opacity: 1; }
+        }
+
+        /* 7. Spinner CSS (The new hack visual) */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: none; /* Initially hidden */
+        }
+        .spinner.visible {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -148,9 +171,10 @@
     </div>
 
     <div id="unmute-overlay">
-        <div class="unmute-message">
-            🎬 Tap to begin the story (Sound On) 🔊
+        <div class="unmute-message" id="unmute-message">
+            🔊 Tap to Load Audio and Stabilize Experience (Click 1 of 2)
         </div>
+        <div class="spinner" id="loading-spinner"></div>
     </div>
     <script>
         // ==========================================
@@ -369,14 +393,16 @@
         const CROSSFADE_STEPS = 50;
         const CROSSFADE_INTERVAL = CROSSFADE_DURATION / CROSSFADE_STEPS;
         const VOLUME_STEP = 1 / CROSSFADE_STEPS;
+        const INITIAL_DELAY_AFTER_UNLOCK = 500;
 
         const contentArea = document.getElementById('content-area');
         const unmuteOverlay = document.getElementById('unmute-overlay');
+        const unmuteMessage = document.getElementById('unmute-message');
+        const loadingSpinner = document.getElementById('loading-spinner');
         let currentAudio = null;
         let currentSectionIndex = 0;
         let hasStarted = false;
 
-        // --- NEW AUDIO MANAGEMENT FOR MOBILE ---
         const audioMap = {};
         let allUniqueTracks = [];
 
@@ -393,21 +419,79 @@
                 audioMap[trackUrl] = audio;
             });
         }
-        // --- END NEW AUDIO MANAGEMENT ---
-
 
         // Helper Functions
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // 🎶 Music Crossfade Logic 🎶 (Unchanged)
+        /**
+         * HACK: Sequentially plays and immediately pauses a single audio track.
+         * By using async/await, we ensure the play() promise resolves and the pause() call
+         * executes before the next track begins, removing the blip race condition.
+         * @param {HTMLAudioElement} audio - The audio element to unlock.
+         */
+        function unlockTrackSequentially(audio) {
+            return new Promise(resolve => {
+                if (!audio) return resolve();
+
+                audio.play().then(() => {
+                    // CRITICAL: Pause immediately after play promise resolves.
+                    // Since volume is 0, this should be silent.
+                    audio.pause();
+                    audio.currentTime = 0;
+                    resolve();
+                }).catch(e => {
+                    // Playback was prevented (e.g., file not found, media element error)
+                    console.warn("Track failed to unlock/play (expected if silent):", e);
+                    // Resolve anyway to continue the sequence
+                    resolve(); 
+                });
+            });
+        }
+        
+        /**
+         * Loops through all tracks sequentially to unlock them.
+         */
+        async function runSequentialUnlock() {
+            // Update message for the loading state
+            unmuteMessage.innerHTML = 'Preloading and stabilizing audio...';
+            unmuteMessage.style.animation = 'none'; // Stop pulse
+            loadingSpinner.classList.add('visible');
+
+            for (const trackUrl of allUniqueTracks) {
+                const audio = audioMap[trackUrl];
+                if (audio) {
+                    await unlockTrackSequentially(audio);
+                }
+            }
+
+            // Update message for the ready state (Click 2)
+            unmuteMessage.innerHTML = '✅ Loading Complete. Tap to Begin Story 🎬 (Click 2 of 2)';
+            unmuteMessage.style.animation = 'pulse 1.5s infinite alternate';
+            loadingSpinner.classList.remove('visible');
+            
+            // Re-enable the click handler to proceed with the story
+            // Note: We are using startCinematicStorySequence here
+            unmuteOverlay.addEventListener('click', startCinematicStorySequence, { once: true });
+        }
+
+
+        // 🎶 Music Crossfade Logic 🎶 
         function playTrack(filename) {
             const previousAudio = currentAudio;
 
             // Get the preloaded audio element
             const newAudio = audioMap[filename];
-            if (!newAudio) return; 
+            if (!newAudio) {
+                if (previousAudio) {
+                    previousAudio.pause();
+                    previousAudio.volume = 0;
+                    previousAudio.currentTime = 0;
+                    currentAudio = null;
+                }
+                return;
+            }
 
             if (previousAudio && previousAudio === newAudio) {
                 return;
@@ -415,9 +499,11 @@
 
             currentAudio = newAudio;
             
-            // Start playing the new audio (it is already unblocked from the initial tap)
-            newAudio.play().catch(error => {
-                console.error(`Playback error for ${filename}:`, error);
+            // Start playing the new audio, it is already unblocked and at volume 0
+            newAudio.play().then(() => {
+                // Play started successfully, proceed with fade logic
+            }).catch(error => {
+                console.error(`Playback error on track switch for ${filename}:`, error);
             });
 
             if (previousAudio) {
@@ -426,25 +512,27 @@
                 const crossfadeTimer = setInterval(() => {
                     currentStep++;
 
-                    // Fade OLD track out
+                    // 1. Fade OLD track out
                     if (previousAudio.volume > VOLUME_STEP) {
                         previousAudio.volume -= VOLUME_STEP;
                     } else {
                         previousAudio.volume = 0;
                     }
 
-                    // Fade NEW track in
+                    // 2. Fade NEW track in
                     if (newAudio.volume < 1 - VOLUME_STEP) {
                         newAudio.volume += VOLUME_STEP;
                     } else {
                         newAudio.volume = 1;
                     }
 
-                    // Stop when fade is complete
+                    // 3. Stop when fade is complete
                     if (currentStep >= CROSSFADE_STEPS) {
                         clearInterval(crossfadeTimer);
+                        // Ensure old track is completely stopped and reset
                         previousAudio.pause();
-                        previousAudio.currentTime = 0;
+                        previousAudio.volume = 0;
+                        previousAudio.currentTime = 0; 
                     }
                 }, CROSSFADE_INTERVAL);
 
@@ -502,7 +590,10 @@
         // Main Flow Control (Unchanged logic)
         function nextSection() {
             if (currentSectionIndex >= pageContent.length) {
-                if (currentAudio) currentAudio.pause();
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.volume = 0;
+                }
                 return;
             }
 
@@ -512,11 +603,16 @@
             // 1. Play the new track (Crossfade Logic)
             if (section.track) {
                 playTrack(section.track);
+            } else if (currentAudio) {
+                // If the new section has no track, silence the current one immediately
+                currentAudio.pause();
+                currentAudio.volume = 0;
+                currentAudio = null; 
             }
 
-            // --- LOGIC FOR TEXT-TO-PHOTO COMBINATION ---
+            // --- LOGIC FOR CONTENT TRANSITIONS ---
             let isContinuousSection = false;
-            if (currentSectionIndex > 0 && previousSection.type === 'text' && section.type === 'photos' && previousSection.track === section.track) {
+            if (currentSectionIndex > 0 && previousSection && previousSection.type === 'text' && section.type === 'photos' && previousSection.track === section.track) {
                 isContinuousSection = true;
             }
 
@@ -550,48 +646,36 @@
             }, renderDelay);
         }
 
-        // ⚡️ INITIALIZATION LOGIC (THE FIX IS HERE) ⚡️
-        function startCinematicStory() {
-            if (hasStarted) return;
-            hasStarted = true;
+        // ⚡️ INITIALIZATION FLOW CONTROL ⚡️
 
-            // 1. Unblock and IMMEDIATELY silence and reset ALL audio tracks
-            allUniqueTracks.forEach(trackUrl => {
-                const audio = audioMap[trackUrl];
-                if (audio) {
-                    // CRITICAL FIX: The audio object starts at volume 0 (from initializeAudio). 
-                    // This means the brief play() call will be silent.
-                    
-                    audio.play().then(() => {
-                        // Success: Audio is unblocked. Now, stop it completely.
-                        audio.pause(); 
-                        audio.currentTime = 0; 
-                        
-                        // NOTE: We do NOT need to reset volume here. 
-                        // The nextSection -> playTrack logic will handle the fade-in from 0 to 1.
-
-                    }).catch(e => {
-                        console.error("Error unblocking audio:", e);
-                    });
-                }
-            });
-            
-            // 2. Wait for fade-out of overlay
+        // Step 2: Starts the story once audio is confirmed unlocked
+        function startCinematicStorySequence() {
             unmuteOverlay.style.opacity = 0;
+            
             setTimeout(() => {
                 unmuteOverlay.style.display = 'none';
-
-                // 3. Start the entire sequence
                 nextSection();
+            }, 1000 + INITIAL_DELAY_AFTER_UNLOCK); // Wait for fade-out + buffer
+        }
 
-            }, 1000); // Wait for the 1s CSS fade-out transition
+        // Step 1: Initiated by the *very first* user click.
+        function handleFirstTap() {
+            if (hasStarted) return;
+            hasStarted = true; 
+
+            // IMPORTANT: Remove the click handler immediately to prevent accidental second click
+            // while the asynchronous loading is running.
+            unmuteOverlay.removeEventListener('click', handleFirstTap);
+
+            // CRITICAL: We run the sequential unlock, which manages the visual feedback (spinner/text change).
+            runSequentialUnlock();
         }
 
         window.onload = function() {
             initializeAudio(); 
-            unmuteOverlay.addEventListener('click', startCinematicStory, { once: true });
+            // The first click runs the unlock process (handleFirstTap)
+            unmuteOverlay.addEventListener('click', handleFirstTap, { once: true });
         };
-
     </script>
 </body>
 </html>
