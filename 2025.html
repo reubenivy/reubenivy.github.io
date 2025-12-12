@@ -345,7 +345,7 @@
         
         /**
          * Loops through all media sequentially to unlock them.
-         * ⭐️ FIX APPLIED HERE: Ensures temporary video element is not in DOM, is playsInline, AND is permanently muted ⭐️
+         * ⭐️ CRITICAL FIX APPLIED HERE: Attaches temporary video to DOM off-screen, then removes it ⭐️
          */
         async function runSequentialUnlock() {
             // State 1: Loading
@@ -353,14 +353,25 @@
             unmuteMessage.style.animation = 'none'; // Stop pulse
             loadingSpinner.classList.add('visible');
             
-            // ⭐️ FIX START: Create the temporary video element inside the function but OUTSIDE the DOM ⭐️
+            // ⭐️ FIX START: Create and configure the temporary video element ⭐️
             let tempVideo = null;
             if (videoUrlToUnlock) {
                 tempVideo = document.createElement('video');
                 tempVideo.src = videoUrlToUnlock;
                 tempVideo.muted = true;
                 tempVideo.preload = 'auto';
-                tempVideo.playsInline = true; // Crucial for preventing fullscreen/player popup
+                tempVideo.playsInline = true; 
+                
+                // CRITICAL FIX: Make it invisible and off-screen, but in the DOM
+                tempVideo.style.position = 'absolute';
+                tempVideo.style.top = '-10000px'; 
+                tempVideo.style.left = '-10000px'; 
+                tempVideo.style.width = '1px';
+                tempVideo.style.height = '1px';
+                tempVideo.style.opacity = '0';
+                
+                document.body.appendChild(tempVideo); // Add to DOM now
+                console.log("Temporary video element added to DOM off-screen.");
             }
 
             // Combine audio and video elements
@@ -384,26 +395,27 @@
                 }
             }
             
-            // CRITICAL STEP B: Un-mute all media tracks (and ensure temp video stays muted)
+            // CRITICAL STEP B: Set final state for media and force pause
             for (const media of allMedia) {
                 if (media) {
-                    media.muted = false; // ALLOW SOUND (still volume 0)
+                    media.muted = false; // ALLOW sound on real tracks later
 
-                    // ⭐️ NEW FIX: Keep the temporary video element permanently muted!
+                    // ⭐️ IMPORTANT: Keep the temporary video element permanently muted!
                     if (media.tagName === 'VIDEO' && media.src === videoUrlToUnlock) {
-                        media.muted = true; // Permanent mute for the hack element
-                        media.volume = 0;   // Ensure no volume
+                        media.muted = true; 
+                        media.volume = 0;   
                     }
-                }
-            }
-            
-            // ⭐ CRITICAL FIX FOR AUTOPLAY AND POPUP ⭐
-            // CRITICAL STEP C: Force pause all tracks immediately after unmuting 
-            for (const media of allMedia) {
-                if (media) {
+                    
+                    // CRITICAL STEP C: Force pause all tracks immediately after unmuting 
                     media.pause(); 
                     media.currentTime = 0;
                 }
+            }
+            
+            // ⭐️ FINAL CRITICAL STEP: Remove the temporary video element from the DOM ⭐️
+            if (tempVideo && document.body.contains(tempVideo)) {
+                document.body.removeChild(tempVideo);
+                console.log("Temporary video element removed from DOM.");
             }
 
 
@@ -548,7 +560,6 @@
         
         /**
          * ⭐️ NEW: Render Video Section function 
-         * FIX APPLIED HERE: Aggressively attempts to un-mute after successful play ⭐️
          */
         function renderVideoSection(videoUrl, duration) {
             contentArea.innerHTML = `
