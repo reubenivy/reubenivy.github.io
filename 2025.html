@@ -105,6 +105,29 @@
         .stack-image.visible {
             opacity: 1;
         }
+        
+        /* ⭐️ NEW VIDEO STYLING ⭐️ */
+        .video-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000; /* Ensure black background behind video */
+        }
+        #cinematic-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Contain the video within the screen */
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            pointer-events: none;
+        }
+        #cinematic-video.visible {
+            opacity: 1;
+        }
+        /* ⭐️ END NEW VIDEO STYLING ⭐️ */
 
         /* 6. Unmute Overlay Styling */
         #unmute-overlay {
@@ -181,7 +204,7 @@
         // 🌟 SECTION CONTROL ARRAY 🌟
         // ==========================================
         const pageContent = [
-            {
+            /*{
                 type: 'text',
                 content: 'It all started with a swipe',
                 duration: 5000,
@@ -216,7 +239,7 @@
             },
 			{
                 type: 'text',
-                content: 'After a few dates, it became official after 30km in a day<br>她说好!',
+                content: 'After a few dates,<br>we became official after 30km in a day<br>她说好!',
                 duration: 7500,
                 track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3'
             },
@@ -369,14 +392,26 @@
 					"https://reubenivy.github.io/moments/25_may_2025_6.jpg",
 					"https://reubenivy.github.io/moments/15_mar_2025_5.jpg",
 					"https://reubenivy.github.io/moments/15_mar_2025_4.jpg",
-					"https://reubenivy.github.io/moments/15_mar_2025_3.jpg",
 					"https://reubenivy.github.io/moments/15_mar_2025_2.jpg"
-					
                 ],
                 duration: 25000,
                 track: 'https://reubenivy.github.io/recap_asset/lalaland.mp3',
                 photoDelay: 2000
+            },*/
+            {
+                type: 'text',
+                content: 'Thanks for letting me meet you in 2025',
+                duration: 7500,
+                track: ''
             },
+            // ⭐️ NEW VIDEO SECTION ADDED ⭐️
+            {
+                type: 'video',
+                content: 'wise_men_say_2.mp4', 
+                duration: 77000, 
+                track: ''
+            },
+            // ⭐️ END NEW VIDEO SECTION ⭐️
 			{
                 type: 'text',
                 content: 'THE END',
@@ -397,6 +432,8 @@
 
         // 🌟 WAKE LOCK VARIABLE 🌟
         let wakeLock = null; 
+        // ⭐️ NEW: Video tracking variable ⭐️
+        let currentVideo = null; 
 
         const contentArea = document.getElementById('content-area');
         const unmuteOverlay = document.getElementById('unmute-overlay');
@@ -408,10 +445,20 @@
 
         const audioMap = {};
         let allUniqueTracks = [];
+        // ⭐️ NEW: Separate collection for video URL ⭐️
+        let videoUrlToUnlock = null;
+
 
         function initializeAudio() {
             // Find all unique track URLs in the page content
-            allUniqueTracks = [...new Set(pageContent.map(s => s.track).filter(t => t))];
+            // NOTE: Only extract audio tracks here.
+            allUniqueTracks = [...new Set(pageContent.map(s => s.track).filter(t => t && t.endsWith('.mp3')))];
+            
+            // Find the video URL for preloading/unlocking
+            const videoSection = pageContent.find(s => s.type === 'video');
+            if (videoSection) {
+                videoUrlToUnlock = videoSection.content;
+            }
 
             // Create Audio objects for each unique track
             allUniqueTracks.forEach(trackUrl => {
@@ -428,7 +475,7 @@
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // --- WAKE LOCK FUNCTIONS ---
+        // --- WAKE LOCK FUNCTIONS (Unchanged) ---
 
         /**
          * 🔒 Attempts to acquire a Screen Wake Lock.
@@ -441,7 +488,8 @@
                     
                     // Re-acquire lock if it's released by the OS (e.g., user briefly switches apps)
                     wakeLock.addEventListener('release', () => {
-                         console.log('Screen Wake Lock released by system.');
+                        console.log('Screen Wake Lock released by system.');
+                        // Note: The system often handles re-acquiring on visibilitychange, but this listener is good practice.
                     });
 
                 } catch (err) {
@@ -468,19 +516,19 @@
             }
         }
         
-        // --- AUDIO UNLOCK FUNCTIONS ---
+        // --- AUDIO/VIDEO UNLOCK FUNCTIONS (Modified to include video) ---
 
         /**
-         * HACK: Sequentially plays and immediately pauses a single audio track.
+         * HACK: Sequentially plays and immediately pauses a single media track.
          */
-        function unlockTrackSequentially(audio) {
+        function unlockTrackSequentially(mediaElement) {
             return new Promise(resolve => {
-                if (!audio) return resolve();
+                if (!mediaElement) return resolve();
 
                 // Play the track. Since 'muted' is true, this is silent.
-                audio.play().then(() => {
-                    audio.pause();
-                    audio.currentTime = 0;
+                mediaElement.play().then(() => {
+                    mediaElement.pause();
+                    mediaElement.currentTime = 0;
                     resolve();
                 }).catch(e => {
                     console.warn("Track failed to unlock/play (expected if silent):", e);
@@ -490,47 +538,55 @@
         }
         
         /**
-         * Loops through all tracks sequentially to unlock them.
-         * Includes the critical PAUSE loop to prevent mobile autoplay.
+         * Loops through all media sequentially to unlock them.
          */
         async function runSequentialUnlock() {
             // State 1: Loading
-            unmuteMessage.innerHTML = 'Preloading and stabilizing audio...';
+            unmuteMessage.innerHTML = 'Preloading and stabilizing media...'; // Updated message
             unmuteMessage.style.animation = 'none'; // Stop pulse
             loadingSpinner.classList.add('visible');
             
-            // CRITICAL STEP A: Force mute all tracks for silent unlock
-            for (const trackUrl of allUniqueTracks) {
-                const audio = audioMap[trackUrl];
-                if (audio) {
-                    audio.muted = true; // FORCE MUTE
+            // ⭐️ NEW: Create a temporary video element for the unlock hack ⭐️
+            const tempVideo = document.createElement('video');
+            if (videoUrlToUnlock) {
+                tempVideo.src = videoUrlToUnlock;
+                tempVideo.muted = true;
+                tempVideo.preload = 'auto';
+            }
+
+            // Combine audio and video elements
+            let allMedia = [...allUniqueTracks.map(url => audioMap[url])];
+            if (videoUrlToUnlock) {
+                allMedia.push(tempVideo);
+            }
+            
+            // CRITICAL STEP A: Force mute all media tracks for silent unlock
+            for (const media of allMedia) {
+                if (media) {
+                    media.muted = true; // FORCE MUTE
                 }
             }
 
             // Perform the sequential unlock
-            for (const trackUrl of allUniqueTracks) {
-                const audio = audioMap[trackUrl];
-                if (audio) {
-                    await unlockTrackSequentially(audio);
+            for (const media of allMedia) {
+                if (media) {
+                    await unlockTrackSequentially(media);
                 }
             }
             
-            // CRITICAL STEP B: Un-mute all tracks 
-            for (const trackUrl of allUniqueTracks) {
-                const audio = audioMap[trackUrl];
-                if (audio) {
-                    audio.muted = false; // ALLOW SOUND (still volume 0)
+            // CRITICAL STEP B: Un-mute all media tracks
+            for (const media of allMedia) {
+                if (media) {
+                    media.muted = false; // ALLOW SOUND (still volume 0)
                 }
             }
-
+            
             // ⭐ CRITICAL FIX FOR AUTOPLAY ⭐
             // CRITICAL STEP C: Force pause all tracks immediately after unmuting 
-            // This prevents mobile browsers from auto-playing the first unmuted track (canon_in_d.mp3).
-             for (const trackUrl of allUniqueTracks) {
-                const audio = audioMap[trackUrl];
-                if (audio) {
-                    audio.pause(); 
-                    audio.currentTime = 0;
+             for (const media of allMedia) {
+                if (media) {
+                    media.pause(); 
+                    media.currentTime = 0;
                 }
             }
 
@@ -548,6 +604,13 @@
         // 🎶 Music Crossfade Logic 🎶 
         function playTrack(filename) {
             const previousAudio = currentAudio;
+
+            // ⭐️ NEW: Stop any playing video before starting a track ⭐️
+            if (currentVideo) {
+                currentVideo.pause();
+                currentVideo.remove();
+                currentVideo = null;
+            }
 
             // Get the preloaded audio element
             const newAudio = audioMap[filename];
@@ -620,13 +683,19 @@
         }
 
 
-        // Rendering Functions (Unchanged)
+        // Rendering Functions 
         function renderTextSection(text) {
             contentArea.innerHTML = `
                 <div class="text-section">
                     <div class="text-content" id="fading-text">${text}</div>
                 </div>
             `;
+            // ⭐️ NEW: Clean up any playing video ⭐️
+            if (currentVideo) {
+                currentVideo.pause();
+                currentVideo.remove(); // Also remove the element
+                currentVideo = null;
+            }
             setTimeout(() => {
                 document.getElementById('fading-text').classList.add('visible');
             }, 50);
@@ -634,6 +703,12 @@
 
         function renderPhotoSection(imageUrls, delayMs) {
             contentArea.innerHTML = '';
+            // ⭐️ NEW: Clean up any playing video ⭐️
+            if (currentVideo) {
+                currentVideo.pause();
+                currentVideo.remove(); // Also remove the element
+                currentVideo = null;
+            }
 
             const orderedImages = [...imageUrls];
 
@@ -654,14 +729,62 @@
                 };
             });
         }
+        
+        // ⭐️ NEW: Render Video Section function - FIX APPLIED HERE ⭐️
+        function renderVideoSection(videoUrl, duration) {
+            contentArea.innerHTML = `
+                <div class="video-container">
+                    <video id="cinematic-video" src="${videoUrl}" autoplay playsinline preload="auto"></video>
+                </div>
+            `;
+            
+            // Stop current audio (no crossfade, immediate stop)
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.volume = 0;
+                currentAudio = null;
+            }
 
-        // Main Flow Control 
+            currentVideo = document.getElementById('cinematic-video');
+            currentVideo.volume = 1; 
+            
+            // 1. ADD ENDED LISTENER: Move to the next section when the video completes.
+            currentVideo.addEventListener('ended', function handleVideoEnd() {
+                console.log("Video playback ended. Moving to next section.");
+                // Prevent double calling if both 'ended' and fallback timeout trigger
+                clearTimeout(videoTimeoutId); 
+                nextSection();
+            }, { once: true }); // Use { once: true } to automatically remove the listener
+
+            // 2. ATTEMPT PLAYBACK: Fade in, then attempt to play.
+            currentVideo.classList.add('visible');
+            currentVideo.play().catch(error => {
+                console.error("Video Autoplay Failed (Expected on some devices):", error);
+            });
+            
+            // 3. FALLBACK TIMEOUT: If 'ended' event doesn't fire or video stops/fails silently.
+            const videoTimeoutId = setTimeout(() => {
+                console.warn("Video duration timeout reached. Moving to next section (Fallback).");
+                if (currentVideo) {
+                    currentVideo.pause();
+                }
+                // Only move if we haven't already moved via the 'ended' event (nextSection handles index check)
+                nextSection(); 
+            }, duration);
+        }
+
+
+        // Main Flow Control (Modified for video)
         function nextSection() {
             if (currentSectionIndex >= pageContent.length) {
                 // STORY ENDED
                 if (currentAudio) {
                     currentAudio.pause();
                     currentAudio.volume = 0;
+                }
+                // ⭐️ NEW: Stop video on story end ⭐️
+                if (currentVideo) {
+                    currentVideo.pause();
                 }
                 // 🔓 RELEASE THE WAKE LOCK WHEN THE STORY IS OVER
                 releaseWakeLock(); 
@@ -671,12 +794,10 @@
             const section = pageContent[currentSectionIndex];
             const previousSection = pageContent[currentSectionIndex - 1];
 
-            // 1. Play the new track (Crossfade Logic)
-            if (section.track) {
-                // This is the point where the music is *actually* played and faded in.
+            // 1. Play the new track (Crossfade Logic) - ONLY if it's an audio track and NOT a video section
+            if (section.type !== 'video' && section.track) {
                 playTrack(section.track);
-            } else if (currentAudio) {
-                // If the new section has no track, silence the current one immediately
+            } else if (section.type !== 'video' && currentAudio) {
                 currentAudio.pause();
                 currentAudio.volume = 0;
                 currentAudio = null; 
@@ -704,6 +825,9 @@
                 } else if (section.type === 'photos') {
                     const photoDelay = section.photoDelay || 3000;
                     renderPhotoSection(section.content, photoDelay);
+                } else if (section.type === 'video') {
+                    // ⭐️ NEW VIDEO RENDER ⭐️
+                    renderVideoSection(section.content, section.duration);
                 }
 
                 // 5. Fade new content in
@@ -711,7 +835,10 @@
 
                 // 6. Set timer for the next section
                 currentSectionIndex++;
-                if (section.duration < 999999) {
+                
+                // CRITICAL FIX: Only set the timeout for non-video sections.
+                // Video section manages its own flow control via the 'ended' event/fallback timer.
+                if (section.type !== 'video' && section.duration < 999999) {
                     setTimeout(nextSection, section.duration);
                 }
 
