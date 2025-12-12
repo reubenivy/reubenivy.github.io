@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematic Photo Stack Story</title>
+    <style>
+        /* 1. Base Setup */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Georgia', serif;
+        }
+
+        /* 2. Background and Section Container */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+        .background-image {
+            width: 100%;
+            height: 100%;
+            /* CHANGE THIS TO YOUR BACKGROUND IMAGE FILENAME */
+            background-image: url('https://reubenivy.github.io/moments/5_apr_2025_5.jpg');
+            background-size: cover;
+            background-position: center;
+            animation: breathe 20s ease-in-out infinite alternate;
+        }
+        @keyframes breathe {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15); } /* Slow zoom-in effect */
+        }
+
+        /* 3. Full-Screen Content Area */
+        #content-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+            transition: opacity 1s ease-in-out;
+            opacity: 0;
+            z-index: 10;
+        }
+
+        /* 4. Text Section Styling (Black and White Movie Title Effect) */
+        .text-section {
+            background-color: black;
+            color: white;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5vw;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .subtext {
+            font-size: 0.5em;
+            display: block;
+            margin-top: 10px;
+        }
+        .text-content {
+            opacity: 0;
+            transition: opacity 3s ease-in; /* Slow fade-in for the text */
+        }
+        .text-content.visible {
+            opacity: 1;
+        }
+
+        /* 5. Photo Stack Styling */
+        .stack-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            max-width: 85vw;
+            max-height: 85vh;
+            width: auto;
+            height: auto;
+
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border: 10px solid white;
+            border-radius: 4px;
+
+            /* Initial state: Hidden below screen */
+            transform: translate(-50%, 150vh) rotate(0deg);
+            opacity: 0;
+            /* Transition for the "fly-in" effect */
+            transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+            pointer-events: none;
+        }
+        .stack-image.visible {
+            opacity: 1;
+        }
+
+        /* 6. Unmute Overlay Styling (NEW) */
+        #unmute-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95); /* Semi-transparent dark overlay */
+            z-index: 1000; /* Ensure it's on top of everything */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 1s ease-out; /* Smooth fade-out */
+        }
+
+        .unmute-message {
+            color: white;
+            font-size: 3vw;
+            text-align: center;
+            padding: 20px;
+            border: 3px solid white;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); /* Glowing border effect */
+            animation: pulse 1.5s infinite alternate; /* Gentle blinking effect */
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="background-image"></div>
+    </div>
+
+    <div id="content-area">
+    </div>
+
+    <div id="unmute-overlay">
+        <div class="unmute-message">
+            🎬 Tap to begin the story (Sound On) 🔊
+        </div>
+    </div>
+    <script>
+        // ==========================================
+        // 🌟 SECTION CONTROL ARRAY 🌟 (MODIFIED with photoDelay)
+        // ==========================================
+        const pageContent = [
+            {
+                type: 'text',
+                content: 'It all started with a swipe...',
+                duration: 5000,
+                track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3'
+            },
+            {
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/moments/07_jan_2025.png"
+                ],
+                duration: 11000,
+                track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3',
+                photoDelay: 5000 // NEW: Fast photo reveal
+            },
+			{
+                type: 'text',
+                content: 'Our first date.',
+                duration: 5000,
+                track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3'
+            },
+            {
+                type: 'photos',
+                content: [
+					"https://reubenivy.github.io/recap_asset/stay_bp.png",
+					"https://reubenivy.github.io/recap_asset/stay_bp_2.png",
+					"https://reubenivy.github.io/recap_asset/first_date.png",
+                    "https://reubenivy.github.io/moments/18_jan_2025.png",
+                ],
+                duration: 26000,
+                track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3',
+                photoDelay: 5000 // NEW: 3 seconds between photos
+            },
+			{
+                type: 'text',
+                content: 'After a few dates, it became official after 30km in a day<span class="subtext">她说好!</span>',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/moments/14_feb_2025_1.jpg",
+                    "https://reubenivy.github.io/moments/14_feb_2025_2.jpg",
+					"https://reubenivy.github.io/recap_asset/pangsua_pond.png",
+					"https://reubenivy.github.io/moments/14_feb_2025_5.jpg",
+					"https://reubenivy.github.io/moments/18_feb_2025_2.jpg"
+                ],
+                duration: 26000,
+                track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3',
+                photoDelay: 5000 // NEW: 5 seconds between photos
+            },
+			{
+                type: 'text',
+                content: 'Couple Profile Pic moment.',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/recap_asset/change_pic_feb_21.png",
+					"https://reubenivy.github.io/recap_asset/couple_pic.png"
+                ],
+                duration: 16000,
+                track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3',
+                photoDelay: 5000 // NEW: 4 seconds between photos
+            },
+			{
+                type: 'text',
+                content: 'Every night before we sleep.',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/we_are_young_2.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+					"https://reubenivy.github.io/recap_asset/chat_4.png",
+					"https://reubenivy.github.io/recap_asset/chat_5.png",
+					"https://reubenivy.github.io/recap_asset/chat_6.jpg",
+					"https://reubenivy.github.io/recap_asset/chat_7.png",
+					"https://reubenivy.github.io/recap_asset/chat_8.png",
+					"https://reubenivy.github.io/recap_asset/chat_9.png",
+					"https://reubenivy.github.io/recap_asset/chat_10.png",
+					"https://reubenivy.github.io/recap_asset/chat_11.png",
+					"https://reubenivy.github.io/recap_asset/chat_12.png",
+					"https://reubenivy.github.io/recap_asset/chat_1.png",
+					"https://reubenivy.github.io/recap_asset/chat_2.png",
+					"https://reubenivy.github.io/recap_asset/chat_3.png",
+					"https://reubenivy.github.io/recap_asset/chat_13.png",
+                ],
+                duration: 42000,
+                track: 'https://reubenivy.github.io/recap_asset/we_are_young_2.mp3',
+                photoDelay: 3000 // NEW: Very quick 2 seconds between photos
+            },
+			{
+                type: 'text',
+                content: '我们一起追的剧s',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/hanzawa_2.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/moments/13_apr_2025_1.jpg",
+                    "https://reubenivy.github.io/moments/18_may_2025_1.jpg",
+					"https://reubenivy.github.io/moments/1_jun_2025_5.jpg",
+					"https://reubenivy.github.io/recap_asset/legal_high.jpg",
+					"https://reubenivy.github.io/recap_asset/couple_or_trouble.jpg",
+					"https://reubenivy.github.io/moments/4_oct_2025_0.jpg",
+					"https://reubenivy.github.io/recap_asset/spy_family.jpg",
+					"https://reubenivy.github.io/recap_asset/news_queen.jpg",
+					"https://reubenivy.github.io/recap_asset/heaven_official_blessing.jpg"
+                ],
+                duration: 30000,
+                track: 'https://reubenivy.github.io/recap_asset/hanzawa_2.mp3',
+                photoDelay: 3000 // NEW: 3 seconds between photos
+            },
+			{
+                type: 'text',
+                content: 'And 电影s',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/zoo.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/moments/22_feb_2025_2.jpeg",
+					"https://reubenivy.github.io/moments/1_mar_2025_2.jpg",
+					"https://reubenivy.github.io/moments/8_mar_2025_2.jpg",
+					"https://reubenivy.github.io/moments/22_mar_2025_5.png",
+					"https://reubenivy.github.io/moments/22_mar_2025_2.jpeg",
+					"https://reubenivy.github.io/moments/29_mar_2025_5.jpg",
+					"https://reubenivy.github.io/moments/4_may_2025_3.jpg",
+					"https://reubenivy.github.io/moments/25_may_2025_1.jpg",
+					"recap_asset/loving_vincent.jpg",
+					"https://reubenivy.github.io/moments/1_jun_2025_2.jpg",
+					"https://reubenivy.github.io/moments/12_jul_2025_2.jpg",
+					"https://reubenivy.github.io/moments/19_jul_2025_2.jpg",
+					"https://reubenivy.github.io/moments/27_jul_2025_3.jpg",
+					"recap_asset/zootopia.jpg",
+					"https://reubenivy.github.io/moments/29_nov_2025_10.jpg",
+					"https://reubenivy.github.io/moments/6_dec_2025_3.jpg"
+                ],
+                duration: 35000,
+                track: 'https://reubenivy.github.io/recap_asset/zoo.mp3',
+                photoDelay: 2000 // NEW: 3 seconds between photos
+            },
+			{
+                type: 'text',
+                content: '以及令人难忘的精彩演出与独特体验',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/lalaland.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+					"https://reubenivy.github.io/moments/20_mar_2025_1.png",
+                    "https://reubenivy.github.io/moments/20_mar_2025_5.jpg",
+					"https://reubenivy.github.io/moments/20_mar_2025_6.jpg",
+					"https://reubenivy.github.io/moments/20_mar_2025_3.jpeg",
+					"https://reubenivy.github.io/moments/20_mar_2025_4.jpeg",
+					"https://reubenivy.github.io/moments/25_may_2025_2.jpg",
+					"https://reubenivy.github.io/moments/25_may_2025_5.jpg",
+					"https://reubenivy.github.io/moments/25_may_2025_6.jpg",
+					"https://reubenivy.github.io/moments/15_mar_2025_5.jpg",
+					"https://reubenivy.github.io/moments/15_mar_2025_4.jpg",
+					"https://reubenivy.github.io/moments/15_mar_2025_3.jpg",
+					"https://reubenivy.github.io/moments/15_mar_2025_2.jpg"
+					
+                ],
+                duration: 25000,
+                track: 'https://reubenivy.github.io/recap_asset/lalaland.mp3',
+                photoDelay: 2000 // NEW: 3 seconds between photos
+            },
+			{
+                type: 'text',
+                content: '与钢琴之夜',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/nocturne.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/moments/9_mar_2025_1.jpg",
+					"https://reubenivy.github.io/moments/12_apr_2025_3.jpg",
+					"https://reubenivy.github.io/moments/12_apr_2025_4.jpg",
+					"https://reubenivy.github.io/moments/14_may_2025_1.jpg",
+					"https://reubenivy.github.io/moments/25_jul_2025_4.jpeg",
+					"https://reubenivy.github.io/moments/23_oct_2025_3.jpg"
+					
+                ],
+                duration: 33000,
+                track: 'https://reubenivy.github.io/recap_asset/nocturne.mp3',
+                photoDelay: 5000 // NEW: 3 seconds between photos
+            },
+            {
+                type: 'text',
+                content: 'THE END',
+                duration: 999999,
+                track: 'https://reubenivy.github.io/recap_asset/track5_end_title.mp3'
+            },
+			{
+                type: 'text',
+                content: 'And the next date, the next date, the next...',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/starry.mp3'
+            },
+            {
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/moments/8_feb_2025_1.jpg",
+                    "https://reubenivy.github.io/moments/8_feb_2025_2.jpg",
+					"https://reubenivy.github.io/moments/8_feb_2025_0.jpg",
+					"https://reubenivy.github.io/moments/8_feb_2025_3.png"
+                ],
+                duration: 20000,
+                track: 'https://reubenivy.github.io/recap_asset/starry.mp3',
+                photoDelay: 3000 // NEW: 3 seconds between photos
+            },
+        ];
+
+        // ==========================================
+        // CONSTANTS AND FLOW CONTROL LOGIC
+        // ==========================================
+
+        // REMOVED GLOBAL IMAGE_DELAY_MS - it's now set in pageContent
+        const CROSSFADE_DURATION = 2000;
+        const CROSSFADE_STEPS = 50;
+        const CROSSFADE_INTERVAL = CROSSFADE_DURATION / CROSSFADE_STEPS;
+        const VOLUME_STEP = 1 / CROSSFADE_STEPS;
+
+        const contentArea = document.getElementById('content-area');
+        const unmuteOverlay = document.getElementById('unmute-overlay');
+        let currentAudio = null;
+        let currentSectionIndex = 0;
+        let hasStarted = false;
+
+        // Helper Functions
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // 🎶 Music Crossfade Logic 🎶
+        function playTrack(filename) {
+            const previousAudio = currentAudio;
+
+            if (previousAudio && previousAudio.src.includes(filename)) {
+                return;
+            }
+
+            const newAudio = new Audio(filename);
+            newAudio.loop = true;
+            newAudio.volume = 0;
+            currentAudio = newAudio;
+
+            newAudio.play().catch(error => {
+                console.log(`Autoplay of ${filename} blocked. This is expected if not triggered by user.`);
+            });
+
+            if (previousAudio) {
+                let currentStep = 0;
+
+                const crossfadeTimer = setInterval(() => {
+                    currentStep++;
+
+                    // Fade OLD track out
+                    if (previousAudio.volume > VOLUME_STEP) {
+                        previousAudio.volume -= VOLUME_STEP;
+                    } else {
+                        previousAudio.volume = 0;
+                    }
+
+                    // Fade NEW track in
+                    if (newAudio.volume < 1 - VOLUME_STEP) {
+                        newAudio.volume += VOLUME_STEP;
+                    } else {
+                        newAudio.volume = 1;
+                    }
+
+                    // Stop when fade is complete
+                    if (currentStep >= CROSSFADE_STEPS) {
+                        clearInterval(crossfadeTimer);
+                        previousAudio.pause();
+                        previousAudio.currentTime = 0;
+                    }
+                }, CROSSFADE_INTERVAL);
+
+            } else {
+                // First track: simple fade-in
+                let currentVolume = 0;
+                const fadeInTimer = setInterval(() => {
+                    currentVolume += VOLUME_STEP;
+                    if (currentVolume >= 1) {
+                        newAudio.volume = 1;
+                        clearInterval(fadeInTimer);
+                    } else {
+                        newAudio.volume = currentVolume;
+                    }
+                }, CROSSFADE_INTERVAL);
+            }
+        }
+
+
+        // Rendering Functions (MODIFIED to accept photoDelay)
+        function renderTextSection(text) {
+            contentArea.innerHTML = `
+                <div class="text-section">
+                    <div class="text-content" id="fading-text">${text}</div>
+                </div>
+            `;
+            setTimeout(() => {
+                document.getElementById('fading-text').classList.add('visible');
+            }, 50);
+        }
+
+        // Accepts the custom delay for this photo sequence
+        function renderPhotoSection(imageUrls, delayMs) {
+            contentArea.innerHTML = '';
+
+            const orderedImages = [...imageUrls];
+
+            orderedImages.forEach((imgUrl, index) => {
+                const img = document.createElement('img');
+                img.src = imgUrl;
+                img.classList.add('stack-image');
+
+                const randomRotation = getRandomInt(-8, 8);
+                contentArea.appendChild(img);
+
+                img.onload = () => {
+                    setTimeout(() => {
+                        img.offsetHeight;
+                        img.classList.add('visible');
+                        // Use the delayMs variable here
+                        img.style.transform = `translate(-50%, -50%) rotate(${randomRotation}deg)`;
+                    }, index * delayMs); // *** USING delayMs HERE ***
+                };
+            });
+        }
+
+        // Main Flow Control (MODIFIED to pass photoDelay)
+        function nextSection() {
+            if (currentSectionIndex >= pageContent.length) {
+                if (currentAudio) currentAudio.pause();
+                return;
+            }
+
+            const section = pageContent[currentSectionIndex];
+            const previousSection = pageContent[currentSectionIndex - 1];
+
+            // 1. Play the new track (Crossfade Logic)
+            if (section.track) {
+                playTrack(section.track);
+            }
+
+            // --- LOGIC FOR TEXT-TO-PHOTO COMBINATION ---
+            let isContinuousSection = false;
+            if (currentSectionIndex > 0 && previousSection.type === 'text' && section.type === 'photos' && previousSection.track === section.track) {
+                isContinuousSection = true;
+            }
+
+            // 2. Determine if we need to fade out previous content
+            if (!isContinuousSection) {
+                contentArea.style.opacity = 0;
+            }
+
+            // 3. Set the delay based on continuity
+            const renderDelay = isContinuousSection ? 50 : 1000;
+
+            setTimeout(() => {
+
+                // 4. Render new content
+                if (section.type === 'text') {
+                    renderTextSection(section.content);
+                } else if (section.type === 'photos') {
+                    // *** PASSING photoDelay HERE ***
+                    const photoDelay = section.photoDelay || 3000; // Use section's delay or default to 3000ms
+                    renderPhotoSection(section.content, photoDelay);
+                }
+
+                // 5. Fade new content in
+                contentArea.style.opacity = 1;
+
+                // 6. Set timer for the next section
+                currentSectionIndex++;
+                if (section.duration < 999999) {
+                    setTimeout(nextSection, section.duration);
+                }
+
+            }, renderDelay);
+        }
+
+        // ⚡️ NEW INITIALIZATION LOGIC ⚡️
+        function startCinematicStory() {
+            if (hasStarted) return;
+            hasStarted = true;
+
+            // 1. Fade out the overlay
+            unmuteOverlay.style.opacity = 0;
+            setTimeout(() => {
+                unmuteOverlay.style.display = 'none';
+                // 2. Begin the main story flow
+                nextSection();
+            }, 1000); // Wait for the 1s CSS fade-out transition
+        }
+
+        window.onload = function() {
+            // Attach the event listener to the overlay.
+            unmuteOverlay.addEventListener('click', startCinematicStory, { once: true });
+        };
+
+    </script>
+</body>
+</html>
