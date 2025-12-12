@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cinematic Photo Stack Story</title>
     <style>
+        /* CSS from before is unchanged, assumed correct */
         /* 1. Base Setup */
         body, html {
             margin: 0;
@@ -28,7 +29,6 @@
         .background-image {
             width: 100%;
             height: 100%;
-            /* CHANGE THIS TO YOUR BACKGROUND IMAGE FILENAME */
             background-image: url('https://reubenivy.github.io/moments/5_apr_2025_5.jpg');
             background-size: cover;
             background-position: center;
@@ -156,6 +156,7 @@
     <script>
         // ==========================================
         // 🌟 SECTION CONTROL ARRAY 🌟
+        // (Unchanged from your last version)
         // ==========================================
         const pageContent = [
             {
@@ -171,7 +172,7 @@
                 ],
                 duration: 11000,
                 track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3',
-                photoDelay: 5000 // NEW: Fast photo reveal
+                photoDelay: 5000
             },
 			{
                 type: 'text',
@@ -189,7 +190,7 @@
                 ],
                 duration: 26000,
                 track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3',
-                photoDelay: 5000 // NEW: 3 seconds between photos
+                photoDelay: 5000
             },
 			{
                 type: 'text',
@@ -208,7 +209,7 @@
                 ],
                 duration: 26000,
                 track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3',
-                photoDelay: 5000 // NEW: 5 seconds between photos
+                photoDelay: 5000
             },
 			{
                 type: 'text',
@@ -224,7 +225,7 @@
                 ],
                 duration: 16000,
                 track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3',
-                photoDelay: 5000 // NEW: 4 seconds between photos
+                photoDelay: 5000
             },
 			{
                 type: 'text',
@@ -251,7 +252,7 @@
                 ],
                 duration: 42000,
                 track: 'https://reubenivy.github.io/recap_asset/we_are_young_2.mp3',
-                photoDelay: 3000 // NEW: Very quick 2 seconds between photos
+                photoDelay: 3000
             },
 			{
                 type: 'text',
@@ -274,7 +275,7 @@
                 ],
                 duration: 30000,
                 track: 'https://reubenivy.github.io/recap_asset/hanzawa_2.mp3',
-                photoDelay: 3000 // NEW: 3 seconds between photos
+                photoDelay: 3000
             },
 			{
                 type: 'text',
@@ -304,7 +305,7 @@
                 ],
                 duration: 35000,
                 track: 'https://reubenivy.github.io/recap_asset/zoo.mp3',
-                photoDelay: 2000 // NEW: 3 seconds between photos
+                photoDelay: 2000
             },
 			{
                 type: 'text',
@@ -325,7 +326,7 @@
                 ],
                 duration: 33000,
                 track: 'https://reubenivy.github.io/recap_asset/nocturne.mp3',
-                photoDelay: 5000 // NEW: 3 seconds between photos
+                photoDelay: 5000
             },
 			{
                 type: 'text',
@@ -352,7 +353,7 @@
                 ],
                 duration: 25000,
                 track: 'https://reubenivy.github.io/recap_asset/lalaland.mp3',
-                photoDelay: 2000 // NEW: 3 seconds between photos
+                photoDelay: 2000
             },
 			{
                 type: 'text',
@@ -402,7 +403,7 @@
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // 🎶 Music Crossfade Logic 🎶 (MODIFIED to use preloaded audioMap)
+        // 🎶 Music Crossfade Logic 🎶 
         function playTrack(filename) {
             const previousAudio = currentAudio;
 
@@ -465,7 +466,7 @@
         }
 
 
-        // Rendering Functions
+        // Rendering Functions (Unchanged)
         function renderTextSection(text) {
             contentArea.innerHTML = `
                 <div class="text-section">
@@ -477,7 +478,6 @@
             }, 50);
         }
 
-        // Accepts the custom delay for this photo sequence
         function renderPhotoSection(imageUrls, delayMs) {
             contentArea.innerHTML = '';
 
@@ -495,14 +495,13 @@
                     setTimeout(() => {
                         img.offsetHeight;
                         img.classList.add('visible');
-                        // Use the delayMs variable here
                         img.style.transform = `translate(-50%, -50%) rotate(${randomRotation}deg)`;
-                    }, index * delayMs); // *** USING delayMs HERE ***
+                    }, index * delayMs);
                 };
             });
         }
 
-        // Main Flow Control
+        // Main Flow Control (Unchanged logic, relies on fixed start flow)
         function nextSection() {
             if (currentSectionIndex >= pageContent.length) {
                 if (currentAudio) currentAudio.pause();
@@ -537,8 +536,7 @@
                 if (section.type === 'text') {
                     renderTextSection(section.content);
                 } else if (section.type === 'photos') {
-                    // *** PASSING photoDelay HERE ***
-                    const photoDelay = section.photoDelay || 3000; // Use section's delay or default to 3000ms
+                    const photoDelay = section.photoDelay || 3000;
                     renderPhotoSection(section.content, photoDelay);
                 }
 
@@ -554,38 +552,40 @@
             }, renderDelay);
         }
 
-        // ⚡️ INITIALIZATION LOGIC (MODIFIED) ⚡️
+        // ⚡️ INITIALIZATION LOGIC (CRITICAL CHANGE) ⚡️
         function startCinematicStory() {
             if (hasStarted) return;
             hasStarted = true;
 
-            // *** CRITICAL FIX FOR MOBILE: Attempt to play/pause all preloaded tracks to unblock them ***
+            // 1. Unblock and IMMEDIATELY silence and reset ALL audio tracks
             allUniqueTracks.forEach(trackUrl => {
                 const audio = audioMap[trackUrl];
                 if (audio) {
+                    // Attempt to play to satisfy user-gesture requirement
                     audio.play().then(() => {
-                        // Success: Audio is unblocked, now pause it.
-                        audio.pause();
-                        audio.currentTime = 0;
+                        // Success: Audio is unblocked. Now, stop it completely.
+                        audio.pause(); 
+                        audio.currentTime = 0; 
                     }).catch(e => {
-                        console.error("Error unblocking audio (usually harmless, if first track plays):", e);
+                        console.error("Error unblocking audio:", e);
                     });
                 }
             });
-            // ********************************************************************************************
-
-            // 1. Fade out the overlay
+            
+            // 2. Wait for fade-out of overlay
             unmuteOverlay.style.opacity = 0;
             setTimeout(() => {
                 unmuteOverlay.style.display = 'none';
-                // 2. Begin the main story flow
+
+                // 3. Start the entire sequence
+                // nextSection() will handle the first song's playback and the first content block.
                 nextSection();
+
             }, 1000); // Wait for the 1s CSS fade-out transition
         }
 
         window.onload = function() {
-            initializeAudio(); // 1. Create all Audio objects first
-            // 2. Attach the event listener to the overlay to trigger startCinematicStory (and unblock audio).
+            initializeAudio(); 
             unmuteOverlay.addEventListener('click', startCinematicStory, { once: true });
         };
 
