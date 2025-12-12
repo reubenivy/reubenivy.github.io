@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2025 Recap</title>
+    <title>Cinematic Photo Stack Story</title>
     <style>
         /* 1. Base Setup */
         body, html {
@@ -106,7 +106,7 @@
             opacity: 1;
         }
         
-        /* ⭐️ VIDEO STYLING ⭐️ */
+        /* ⭐️ NEW VIDEO STYLING ⭐️ */
         .video-container {
             position: absolute;
             width: 100%;
@@ -127,19 +127,7 @@
         #cinematic-video.visible {
             opacity: 1;
         }
-        /* ⭐️ END VIDEO STYLING ⭐️ */
-        
-        /* 🚨 NEW CRITICAL FIX CSS: Absolute concealment for the unlock video */
-        .hidden-unlock-video {
-            position: absolute !important;
-            top: -9999px !important;
-            left: -9999px !important;
-            width: 0 !important;
-            height: 0 !important;
-            opacity: 0 !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
-        }
+        /* ⭐️ END NEW VIDEO STYLING ⭐️ */
 
         /* 6. Unmute Overlay Styling */
         #unmute-overlay {
@@ -216,20 +204,214 @@
         // 🌟 SECTION CONTROL ARRAY 🌟
         // ==========================================
         const pageContent = [
+            /*{
+                type: 'text',
+                content: 'It all started with a swipe',
+                duration: 5000,
+                track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3'
+            },
+            {
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/moments/07_jan_2025.png"
+                ],
+                duration: 11000,
+                track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3',
+                photoDelay: 5000
+            },
+			{
+                type: 'text',
+                content: 'Our first date',
+                duration: 5000,
+                track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3'
+            },
+            {
+                type: 'photos',
+                content: [
+					"https://reubenivy.github.io/recap_asset/stay_bp.png",
+					"https://reubenivy.github.io/recap_asset/stay_bp_2.png",
+					"https://reubenivy.github.io/recap_asset/first_date.png",
+                    "https://reubenivy.github.io/moments/18_jan_2025.png",
+                ],
+                duration: 26000,
+                track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3',
+                photoDelay: 5000
+            },
+			{
+                type: 'text',
+                content: 'After a few dates,<br>we became official after 30km in a day<br>她说好!',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/moments/14_feb_2025_1.jpg",
+                    "https://reubenivy.github.io/moments/14_feb_2025_2.jpg",
+					"https://reubenivy.github.io/recap_asset/pangsua_pond.png",
+					"https://reubenivy.github.io/moments/14_feb_2025_5.jpg",
+					"https://reubenivy.github.io/moments/18_feb_2025_2.jpg"
+                ],
+                duration: 26000,
+                track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3',
+                photoDelay: 5000
+            },
+			{
+                type: 'text',
+                content: 'Couple Profile Pic moment',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/recap_asset/change_pic_feb_21.png",
+					"https://reubenivy.github.io/recap_asset/couple_pic.png"
+                ],
+                duration: 16000,
+                track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3',
+                photoDelay: 5000
+            },
+			{
+                type: 'text',
+                content: 'Every night before we sleep',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/we_are_young_2.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+					"https://reubenivy.github.io/recap_asset/chat_4.png",
+					"https://reubenivy.github.io/recap_asset/chat_5.png",
+					"https://reubenivy.github.io/recap_asset/chat_6.jpg",
+					"https://reubenivy.github.io/recap_asset/chat_7.png",
+					"https://reubenivy.github.io/recap_asset/chat_8.png",
+					"https://reubenivy.github.io/recap_asset/chat_9.png",
+					"https://reubenivy.github.io/recap_asset/chat_10.png",
+					"https://reubenivy.github.io/recap_asset/chat_11.png",
+					"https://reubenivy.github.io/recap_asset/chat_12.png",
+					"https://reubenivy.github.io/recap_asset/chat_1.png",
+					"https://reubenivy.github.io/recap_asset/chat_2.png",
+					"https://reubenivy.github.io/recap_asset/chat_3.png",
+					"https://reubenivy.github.io/recap_asset/chat_13.png",
+                ],
+                duration: 42000,
+                track: 'https://reubenivy.github.io/recap_asset/we_are_young_2.mp3',
+                photoDelay: 3000
+            },
+			{
+                type: 'text',
+                content: '我们一起追的剧s',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/hanzawa_2.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/moments/13_apr_2025_1.jpg",
+                    "https://reubenivy.github.io/moments/18_may_2025_1.jpg",
+					"https://reubenivy.github.io/moments/1_jun_2025_5.jpg",
+					"https://reubenivy.github.io/recap_asset/legal_high.jpg",
+					"https://reubenivy.github.io/recap_asset/couple_or_trouble.jpg",
+					"https://reubenivy.github.io/moments/4_oct_2025_0.jpg",
+					"https://reubenivy.github.io/recap_asset/spy_family.jpg",
+					"https://reubenivy.github.io/recap_asset/news_queen.jpg",
+					"https://reubenivy.github.io/recap_asset/heaven_official_blessing.jpg"
+                ],
+                duration: 30000,
+                track: 'https://reubenivy.github.io/recap_asset/hanzawa_2.mp3',
+                photoDelay: 3000
+            },
+			{
+                type: 'text',
+                content: 'And 电影s',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/zoo.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/moments/22_feb_2025_2.jpeg",
+					"https://reubenivy.github.io/moments/1_mar_2025_2.jpg",
+					"https://reubenivy.github.io/moments/8_mar_2025_2.jpg",
+					"https://reubenivy.github.io/moments/22_mar_2025_5.png",
+					"https://reubenivy.github.io/moments/22_mar_2025_2.jpeg",
+					"https://reubenivy.github.io/moments/29_mar_2025_5.jpg",
+					"https://reubenivy.github.io/moments/4_may_2025_3.jpg",
+					"https://reubenivy.github.io/moments/25_may_2025_1.jpg",
+					"https://reubenivy.github.io/recap_asset/loving_vincent.jpg",
+					"https://reubenivy.github.io/moments/1_jun_2025_2.jpg",
+					"https://reubenivy.github.io/moments/12_jul_2025_2.jpg",
+					"https://reubenivy.github.io/moments/19_jul_2025_2.jpg",
+					"https://reubenivy.github.io/moments/27_jul_2025_3.jpg",
+					"https://reubenivy.github.io/recap_asset/zootopia.jpg",
+					"https://reubenivy.github.io/moments/29_nov_2025_10.jpg",
+					"https://reubenivy.github.io/moments/6_dec_2025_3.jpg"
+                ],
+                duration: 35000,
+                track: 'https://reubenivy.github.io/recap_asset/zoo.mp3',
+                photoDelay: 2000
+            },
+			{
+                type: 'text',
+                content: 'And Piano Concerts',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/nocturne.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+                    "https://reubenivy.github.io/moments/9_mar_2025_1.jpg",
+					"https://reubenivy.github.io/moments/12_apr_2025_3.jpg",
+					"https://reubenivy.github.io/moments/12_apr_2025_4.jpg",
+					"https://reubenivy.github.io/moments/14_may_2025_1.jpg",
+					"https://reubenivy.github.io/moments/25_jul_2025_4.jpeg",
+					"https://reubenivy.github.io/moments/23_oct_2025_3.jpg"
+					
+                ],
+                duration: 33000,
+                track: 'https://reubenivy.github.io/recap_asset/nocturne.mp3',
+                photoDelay: 5000
+            },
+			{
+                type: 'text',
+                content: 'And many more performances and experiences',
+                duration: 7500,
+                track: 'https://reubenivy.github.io/recap_asset/lalaland.mp3'
+            },
+			{
+                type: 'photos',
+                content: [
+					"https://reubenivy.github.io/moments/20_mar_2025_1.png",
+                    "https://reubenivy.github.io/moments/20_mar_2025_5.jpg",
+					"https://reubenivy.github.io/moments/20_mar_2025_6.jpg",
+					"https://reubenivy.github.io/moments/20_mar_2025_3.jpeg",
+					"https://reubenivy.github.io/moments/20_mar_2025_4.jpeg",
+					"https://reubenivy.github.io/moments/25_may_2025_2.jpg",
+					"https://reubenivy.github.io/moments/25_may_2025_5.jpg",
+					"https://reubenivy.github.io/moments/25_may_2025_6.jpg",
+					"https://reubenivy.github.io/moments/15_mar_2025_5.jpg",
+					"https://reubenivy.github.io/moments/15_mar_2025_4.jpg",
+					"https://reubenivy.github.io/moments/15_mar_2025_2.jpg"
+                ],
+                duration: 25000,
+                track: 'https://reubenivy.github.io/recap_asset/lalaland.mp3',
+                photoDelay: 2000
+            },*/
             {
                 type: 'text',
                 content: 'Thanks for letting me meet you in 2025',
                 duration: 7500,
                 track: ''
             },
-            // ⭐️ VIDEO SECTION ⭐️
+            // ⭐️ NEW VIDEO SECTION ADDED ⭐️
             {
                 type: 'video',
                 content: 'https://reubenivy.github.io/recap_asset/wise_men_say_2.mp4', 
                 duration: 77000, 
                 track: ''
             },
-            // ⭐️ END VIDEO SECTION ⭐️
+            // ⭐️ END NEW VIDEO SECTION ⭐️
 			{
                 type: 'text',
                 content: 'THE END',
@@ -248,9 +430,10 @@
         const VOLUME_STEP = 1 / CROSSFADE_STEPS;
         const INITIAL_DELAY_AFTER_UNLOCK = 500;
 
+        // 🌟 WAKE LOCK VARIABLE 🌟
         let wakeLock = null; 
+        // ⭐️ NEW: Video tracking variable ⭐️
         let currentVideo = null; 
-        let videoTimeoutId = null; 
 
         const contentArea = document.getElementById('content-area');
         const unmuteOverlay = document.getElementById('unmute-overlay');
@@ -262,17 +445,22 @@
 
         const audioMap = {};
         let allUniqueTracks = [];
+        // ⭐️ NEW: Separate collection for video URL ⭐️
         let videoUrlToUnlock = null;
 
 
         function initializeAudio() {
+            // Find all unique track URLs in the page content
+            // NOTE: Only extract audio tracks here.
             allUniqueTracks = [...new Set(pageContent.map(s => s.track).filter(t => t && t.endsWith('.mp3')))];
             
+            // Find the video URL for preloading/unlocking
             const videoSection = pageContent.find(s => s.type === 'video');
             if (videoSection) {
                 videoUrlToUnlock = videoSection.content;
             }
 
+            // Create Audio objects for each unique track
             allUniqueTracks.forEach(trackUrl => {
                 const audio = new Audio(trackUrl);
                 audio.loop = true;
@@ -287,15 +475,21 @@
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // --- WAKE LOCK FUNCTIONS ---
+        // --- WAKE LOCK FUNCTIONS (Unchanged) ---
+
+        /**
+         * 🔒 Attempts to acquire a Screen Wake Lock.
+         */
         async function requestWakeLock() {
             if ('wakeLock' in navigator) {
                 try {
                     wakeLock = await navigator.wakeLock.request('screen');
                     console.log('Screen Wake Lock acquired.');
                     
+                    // Re-acquire lock if it's released by the OS (e.g., user briefly switches apps)
                     wakeLock.addEventListener('release', () => {
                         console.log('Screen Wake Lock released by system.');
+                        // Note: The system often handles re-acquiring on visibilitychange, but this listener is good practice.
                     });
 
                 } catch (err) {
@@ -306,6 +500,9 @@
             }
         }
 
+        /**
+         * 🔓 Attempts to release the Screen Wake Lock.
+         */
         function releaseWakeLock() {
             if (wakeLock) {
                 wakeLock.release()
@@ -319,12 +516,16 @@
             }
         }
         
-        // --- AUDIO/VIDEO UNLOCK FUNCTIONS (FIX APPLIED HERE) ---
+        // --- AUDIO/VIDEO UNLOCK FUNCTIONS (Modified to include video) ---
 
+        /**
+         * HACK: Sequentially plays and immediately pauses a single media track.
+         */
         function unlockTrackSequentially(mediaElement) {
             return new Promise(resolve => {
                 if (!mediaElement) return resolve();
 
+                // Play the track. Since 'muted' is true, this is silent.
                 mediaElement.play().then(() => {
                     mediaElement.pause();
                     mediaElement.currentTime = 0;
@@ -336,36 +537,33 @@
             });
         }
         
+        /**
+         * Loops through all media sequentially to unlock them.
+         */
         async function runSequentialUnlock() {
-            unmuteMessage.innerHTML = 'Preloading and stabilizing media...'; 
-            unmuteMessage.style.animation = 'none'; 
+            // State 1: Loading
+            unmuteMessage.innerHTML = 'Preloading and stabilizing media...'; // Updated message
+            unmuteMessage.style.animation = 'none'; // Stop pulse
             loadingSpinner.classList.add('visible');
             
-            // ⭐️ FIX: Create the temporary video element and apply the absolute concealment class ⭐️
+            // ⭐️ NEW: Create a temporary video element for the unlock hack ⭐️
             const tempVideo = document.createElement('video');
-            let videoIsTemp = false;
-            
             if (videoUrlToUnlock) {
                 tempVideo.src = videoUrlToUnlock;
                 tempVideo.muted = true;
                 tempVideo.preload = 'auto';
-                
-                // CRITICAL FIX: Apply the absolute concealment class
-                tempVideo.classList.add('hidden-unlock-video'); 
-                
-                document.body.appendChild(tempVideo); // Must be in DOM for play() call to work reliably
-                videoIsTemp = true;
             }
 
+            // Combine audio and video elements
             let allMedia = [...allUniqueTracks.map(url => audioMap[url])];
-            if (videoIsTemp) {
+            if (videoUrlToUnlock) {
                 allMedia.push(tempVideo);
             }
             
             // CRITICAL STEP A: Force mute all media tracks for silent unlock
             for (const media of allMedia) {
                 if (media) {
-                    media.muted = true; 
+                    media.muted = true; // FORCE MUTE
                 }
             }
 
@@ -379,11 +577,12 @@
             // CRITICAL STEP B: Un-mute all media tracks
             for (const media of allMedia) {
                 if (media) {
-                    media.muted = false; 
+                    media.muted = false; // ALLOW SOUND (still volume 0)
                 }
             }
             
-            // CRITICAL STEP C: Force pause all tracks immediately after unmuting
+            // ⭐ CRITICAL FIX FOR AUTOPLAY ⭐
+            // CRITICAL STEP C: Force pause all tracks immediately after unmuting 
              for (const media of allMedia) {
                 if (media) {
                     media.pause(); 
@@ -391,15 +590,13 @@
                 }
             }
 
-            // ⭐️ FIX: Clean up the temporary video element after the unlock is complete ⭐️
-            if (videoIsTemp && tempVideo.parentNode) {
-                tempVideo.parentNode.removeChild(tempVideo);
-            }
 
+            // State 2: Ready
             unmuteMessage.innerHTML = '✅ Loading Complete. Tap to Begin Story 🎬 (Click 2 of 2)';
             unmuteMessage.style.animation = 'pulse 1.5s infinite alternate';
             loadingSpinner.classList.remove('visible');
             
+            // Re-enable the click handler for the second step
             unmuteOverlay.addEventListener('click', startCinematicStorySequence, { once: true });
         }
 
@@ -408,12 +605,14 @@
         function playTrack(filename) {
             const previousAudio = currentAudio;
 
+            // ⭐️ NEW: Stop any playing video before starting a track ⭐️
             if (currentVideo) {
                 currentVideo.pause();
                 currentVideo.remove();
                 currentVideo = null;
             }
 
+            // Get the preloaded audio element
             const newAudio = audioMap[filename];
             if (!newAudio) {
                 if (previousAudio) {
@@ -431,7 +630,9 @@
 
             currentAudio = newAudio;
             
+            // Start playing the new audio, it is unblocked, unmuted, and at volume 0
             newAudio.play().then(() => {
+                // Play started successfully, proceed with fade logic
             }).catch(error => {
                 console.error(`Playback error on track switch for ${filename}:`, error);
             });
@@ -442,20 +643,24 @@
                 const crossfadeTimer = setInterval(() => {
                     currentStep++;
 
+                    // 1. Fade OLD track out
                     if (previousAudio.volume > VOLUME_STEP) {
                         previousAudio.volume -= VOLUME_STEP;
                     } else {
                         previousAudio.volume = 0;
                     }
 
+                    // 2. Fade NEW track in
                     if (newAudio.volume < 1 - VOLUME_STEP) {
                         newAudio.volume += VOLUME_STEP;
                     } else {
                         newAudio.volume = 1;
                     }
 
+                    // 3. Stop when fade is complete
                     if (currentStep >= CROSSFADE_STEPS) {
                         clearInterval(crossfadeTimer);
+                        // Ensure old track is completely stopped and reset
                         previousAudio.pause();
                         previousAudio.volume = 0;
                         previousAudio.currentTime = 0; 
@@ -463,6 +668,7 @@
                 }, CROSSFADE_INTERVAL);
 
             } else {
+                // First track: simple fade-in
                 let currentVolume = 0;
                 const fadeInTimer = setInterval(() => {
                     currentVolume += VOLUME_STEP;
@@ -476,20 +682,19 @@
             }
         }
 
+
+        // Rendering Functions 
         function renderTextSection(text) {
             contentArea.innerHTML = `
                 <div class="text-section">
                     <div class="text-content" id="fading-text">${text}</div>
                 </div>
             `;
+            // ⭐️ NEW: Clean up any playing video ⭐️
             if (currentVideo) {
                 currentVideo.pause();
-                currentVideo.remove(); 
+                currentVideo.remove(); // Also remove the element
                 currentVideo = null;
-            }
-            if (videoTimeoutId) {
-                clearTimeout(videoTimeoutId);
-                videoTimeoutId = null;
             }
             setTimeout(() => {
                 document.getElementById('fading-text').classList.add('visible');
@@ -498,14 +703,11 @@
 
         function renderPhotoSection(imageUrls, delayMs) {
             contentArea.innerHTML = '';
+            // ⭐️ NEW: Clean up any playing video ⭐️
             if (currentVideo) {
                 currentVideo.pause();
-                currentVideo.remove(); 
+                currentVideo.remove(); // Also remove the element
                 currentVideo = null;
-            }
-            if (videoTimeoutId) {
-                clearTimeout(videoTimeoutId);
-                videoTimeoutId = null;
             }
 
             const orderedImages = [...imageUrls];
@@ -528,14 +730,15 @@
             });
         }
         
-        function setupVideoSection(videoUrl, duration) {
-            // Prepare the video element and append it to the DOM
+        // ⭐️ NEW: Render Video Section function - FIX APPLIED HERE ⭐️
+        function renderVideoSection(videoUrl, duration) {
             contentArea.innerHTML = `
                 <div class="video-container">
-                    <video id="cinematic-video" src="${videoUrl}" playsinline preload="auto"></video>
+                    <video id="cinematic-video" src="${videoUrl}" autoplay playsinline preload="auto"></video>
                 </div>
             `;
             
+            // Stop current audio (no crossfade, immediate stop)
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.volume = 0;
@@ -544,37 +747,34 @@
 
             currentVideo = document.getElementById('cinematic-video');
             currentVideo.volume = 1; 
-            currentVideo.classList.add('visible'); 
-
-            if (videoTimeoutId) {
-                clearTimeout(videoTimeoutId);
-                videoTimeoutId = null;
-            }
             
-            // Set the timeout for when the video should end/transition
-            const handleTransition = () => {
-                console.log("Video playback ended/timeout. Moving to next section.");
-                if (videoTimeoutId) {
-                    clearTimeout(videoTimeoutId); 
-                    videoTimeoutId = null;
-                }
+            // 1. ADD ENDED LISTENER: Move to the next section when the video completes.
+            currentVideo.addEventListener('ended', function handleVideoEnd() {
+                console.log("Video playback ended. Moving to next section.");
+                // Prevent double calling if both 'ended' and fallback timeout trigger
+                clearTimeout(videoTimeoutId); 
+                nextSection();
+            }, { once: true }); // Use { once: true } to automatically remove the listener
+
+            // 2. ATTEMPT PLAYBACK: Fade in, then attempt to play.
+            currentVideo.classList.add('visible');
+            currentVideo.play().catch(error => {
+                console.error("Video Autoplay Failed (Expected on some devices):", error);
+            });
+            
+            // 3. FALLBACK TIMEOUT: If 'ended' event doesn't fire or video stops/fails silently.
+            const videoTimeoutId = setTimeout(() => {
+                console.warn("Video duration timeout reached. Moving to next section (Fallback).");
                 if (currentVideo) {
                     currentVideo.pause();
                 }
-                nextSection();
-            };
-            
-            // Listen for the natural video end
-            currentVideo.addEventListener('ended', handleTransition, { once: true });
-
-            // Fallback timeout based on the duration defined in pageContent
-            videoTimeoutId = setTimeout(handleTransition, duration + 1000);
-            
-            // Return the video element so it can be played immediately upon user gesture
-            return currentVideo;
+                // Only move if we haven't already moved via the 'ended' event (nextSection handles index check)
+                nextSection(); 
+            }, duration);
         }
 
-        // Main Flow Control
+
+        // Main Flow Control (Modified for video)
         function nextSection() {
             if (currentSectionIndex >= pageContent.length) {
                 // STORY ENDED
@@ -582,23 +782,19 @@
                     currentAudio.pause();
                     currentAudio.volume = 0;
                 }
+                // ⭐️ NEW: Stop video on story end ⭐️
                 if (currentVideo) {
                     currentVideo.pause();
                 }
+                // 🔓 RELEASE THE WAKE LOCK WHEN THE STORY IS OVER
                 releaseWakeLock(); 
                 return;
             }
 
             const section = pageContent[currentSectionIndex];
             const previousSection = pageContent[currentSectionIndex - 1];
-            
-            // CRITICAL FIX: If the next section is a video, DO NOT call render function here. 
-            // The video must be rendered and played by startCinematicStorySequence (the second click handler).
-            if (section.type === 'video' && currentSectionIndex === 1) { 
-                return;
-            }
 
-            // 1. Play the new track (Crossfade Logic)
+            // 1. Play the new track (Crossfade Logic) - ONLY if it's an audio track and NOT a video section
             if (section.type !== 'video' && section.track) {
                 playTrack(section.track);
             } else if (section.type !== 'video' && currentAudio) {
@@ -607,6 +803,7 @@
                 currentAudio = null; 
             }
 
+            // --- LOGIC FOR CONTENT TRANSITIONS ---
             let isContinuousSection = false;
             if (currentSectionIndex > 0 && previousSection && previousSection.type === 'text' && section.type === 'photos' && previousSection.track === section.track) {
                 isContinuousSection = true;
@@ -628,6 +825,9 @@
                 } else if (section.type === 'photos') {
                     const photoDelay = section.photoDelay || 3000;
                     renderPhotoSection(section.content, photoDelay);
+                } else if (section.type === 'video') {
+                    // ⭐️ NEW VIDEO RENDER ⭐️
+                    renderVideoSection(section.content, section.duration);
                 }
 
                 // 5. Fade new content in
@@ -636,7 +836,9 @@
                 // 6. Set timer for the next section
                 currentSectionIndex++;
                 
-                if (section.duration < 999999) {
+                // CRITICAL FIX: Only set the timeout for non-video sections.
+                // Video section manages its own flow control via the 'ended' event/fallback timer.
+                if (section.type !== 'video' && section.duration < 999999) {
                     setTimeout(nextSection, section.duration);
                 }
 
@@ -652,30 +854,8 @@
             // 🔒 REQUEST THE WAKE LOCK HERE (Triggered by Click 2)
             requestWakeLock();
 
-            // CRITICAL FIX FOR iOS: Check if the *next* section is a video and play it immediately.
-            const nextSectionData = pageContent[currentSectionIndex];
-            let videoToPlay = null;
-
-            if (nextSectionData && nextSectionData.type === 'video') {
-                videoToPlay = setupVideoSection(nextSectionData.content, nextSectionData.duration);
-            }
-
-            // Immediately run the video play command before the fade-out delay finishes.
-            if (videoToPlay) {
-                videoToPlay.play().catch(error => {
-                    console.error("CRITICAL: Video Autoplay Failed on Click 2:", error);
-                    // Fallback: If autoplay fails, we still advance the story after the delay.
-                });
-                
-                // Advance the index for the video section
-                currentSectionIndex++; 
-            }
-            
             setTimeout(() => {
                 unmuteOverlay.style.display = 'none';
-                
-                // If we played the video (or if the next section wasn't a video), continue the sequence.
-                // If it was a video, currentSectionIndex is now pointing to the section *after* the video.
                 nextSection();
             }, 1000 + INITIAL_DELAY_AFTER_UNLOCK); // Wait for fade-out + buffer
         }
