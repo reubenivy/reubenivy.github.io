@@ -107,7 +107,7 @@
             opacity: 1;
         }
 
-        /* 6. Unmute Overlay Styling (NEW) */
+        /* 6. Unmute Overlay Styling */
         #unmute-overlay {
             position: fixed;
             top: 0;
@@ -155,12 +155,12 @@
     </div>
     <script>
         // ==========================================
-        // 🌟 SECTION CONTROL ARRAY 🌟 (MODIFIED with photoDelay)
+        // 🌟 SECTION CONTROL ARRAY 🌟
         // ==========================================
         const pageContent = [
             {
                 type: 'text',
-                content: 'It all started with a swipe...',
+                content: 'It all started with a swipe',
                 duration: 5000,
                 track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3'
             },
@@ -175,7 +175,7 @@
             },
 			{
                 type: 'text',
-                content: 'Our first date.',
+                content: 'Our first date',
                 duration: 5000,
                 track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3'
             },
@@ -193,7 +193,7 @@
             },
 			{
                 type: 'text',
-                content: 'After a few dates, it became official after 30km in a day<span class="subtext">她说好!</span>',
+                content: 'After a few dates, it became official after 30km in a day<br>她说好!',
                 duration: 7500,
                 track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3'
             },
@@ -212,7 +212,7 @@
             },
 			{
                 type: 'text',
-                content: 'Couple Profile Pic moment.',
+                content: 'Couple Profile Pic moment',
                 duration: 7500,
                 track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3'
             },
@@ -228,7 +228,7 @@
             },
 			{
                 type: 'text',
-                content: 'Every night before we sleep.',
+                content: 'Every night before we sleep',
                 duration: 7500,
                 track: 'https://reubenivy.github.io/recap_asset/we_are_young_2.mp3'
             },
@@ -308,7 +308,7 @@
             },
 			{
                 type: 'text',
-                content: '与钢琴之夜',
+                content: 'And Piano Concerts',
                 duration: 7500,
                 track: 'https://reubenivy.github.io/recap_asset/nocturne.mp3'
             },
@@ -329,7 +329,7 @@
             },
 			{
                 type: 'text',
-                content: '以及令人难忘的精彩演出与独特体验',
+                content: 'And many more performances and experiences',
                 duration: 7500,
                 track: 'https://reubenivy.github.io/recap_asset/lalaland.mp3'
             },
@@ -366,7 +366,6 @@
         // CONSTANTS AND FLOW CONTROL LOGIC
         // ==========================================
 
-        // REMOVED GLOBAL IMAGE_DELAY_MS - it's now set in pageContent
         const CROSSFADE_DURATION = 2000;
         const CROSSFADE_STEPS = 50;
         const CROSSFADE_INTERVAL = CROSSFADE_DURATION / CROSSFADE_STEPS;
@@ -378,26 +377,48 @@
         let currentSectionIndex = 0;
         let hasStarted = false;
 
+        // --- NEW AUDIO MANAGEMENT FOR MOBILE ---
+        const audioMap = {};
+        let allUniqueTracks = [];
+
+        function initializeAudio() {
+            // Find all unique track URLs in the page content
+            allUniqueTracks = [...new Set(pageContent.map(s => s.track).filter(t => t))];
+
+            // Create Audio objects for each unique track
+            allUniqueTracks.forEach(trackUrl => {
+                const audio = new Audio(trackUrl);
+                audio.loop = true;
+                audio.preload = 'auto';
+                audio.volume = 0;
+                audioMap[trackUrl] = audio;
+            });
+        }
+        // --- END NEW AUDIO MANAGEMENT ---
+
+
         // Helper Functions
         function getRandomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // 🎶 Music Crossfade Logic 🎶
+        // 🎶 Music Crossfade Logic 🎶 (MODIFIED to use preloaded audioMap)
         function playTrack(filename) {
             const previousAudio = currentAudio;
 
-            if (previousAudio && previousAudio.src.includes(filename)) {
+            // Get the preloaded audio element
+            const newAudio = audioMap[filename];
+            if (!newAudio) return; 
+
+            if (previousAudio && previousAudio === newAudio) {
                 return;
             }
 
-            const newAudio = new Audio(filename);
-            newAudio.loop = true;
-            newAudio.volume = 0;
             currentAudio = newAudio;
-
+            
+            // Start playing the new audio (it is already unblocked from the initial tap)
             newAudio.play().catch(error => {
-                console.log(`Autoplay of ${filename} blocked. This is expected if not triggered by user.`);
+                console.error(`Playback error for ${filename}:`, error);
             });
 
             if (previousAudio) {
@@ -444,7 +465,7 @@
         }
 
 
-        // Rendering Functions (MODIFIED to accept photoDelay)
+        // Rendering Functions
         function renderTextSection(text) {
             contentArea.innerHTML = `
                 <div class="text-section">
@@ -481,7 +502,7 @@
             });
         }
 
-        // Main Flow Control (MODIFIED to pass photoDelay)
+        // Main Flow Control
         function nextSection() {
             if (currentSectionIndex >= pageContent.length) {
                 if (currentAudio) currentAudio.pause();
@@ -533,10 +554,25 @@
             }, renderDelay);
         }
 
-        // ⚡️ NEW INITIALIZATION LOGIC ⚡️
+        // ⚡️ INITIALIZATION LOGIC (MODIFIED) ⚡️
         function startCinematicStory() {
             if (hasStarted) return;
             hasStarted = true;
+
+            // *** CRITICAL FIX FOR MOBILE: Attempt to play/pause all preloaded tracks to unblock them ***
+            allUniqueTracks.forEach(trackUrl => {
+                const audio = audioMap[trackUrl];
+                if (audio) {
+                    audio.play().then(() => {
+                        // Success: Audio is unblocked, now pause it.
+                        audio.pause();
+                        audio.currentTime = 0;
+                    }).catch(e => {
+                        console.error("Error unblocking audio (usually harmless, if first track plays):", e);
+                    });
+                }
+            });
+            // ********************************************************************************************
 
             // 1. Fade out the overlay
             unmuteOverlay.style.opacity = 0;
@@ -548,7 +584,8 @@
         }
 
         window.onload = function() {
-            // Attach the event listener to the overlay.
+            initializeAudio(); // 1. Create all Audio objects first
+            // 2. Attach the event listener to the overlay to trigger startCinematicStory (and unblock audio).
             unmuteOverlay.addEventListener('click', startCinematicStory, { once: true });
         };
 
