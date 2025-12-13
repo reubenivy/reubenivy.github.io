@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2025 Recap</title>
+	
+	<script>
+      if (sessionStorage.getItem("authenticated") !== "true") {
+        // Redirect to login page if not
+        window.location.href = "2025_login.html";
+      }
+    </script>
+	
     <style>
         /* 1. Base Setup */
         body, html {
@@ -250,7 +258,7 @@
     
     <div id="mobile-video-prompt" class="hidden">
         <div class="video-play-button" id="video-play-button">
-            ▶️ Tap to Play Cinematic Video
+            ▶️ Tap to Play Video
         </div>
     </div>
 
@@ -269,7 +277,7 @@
                 type: 'text',
                 content: 'It all started with a swipe',
                 duration: 5000,
-                track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3'
+                track: "recap_asset/canon_in_d.mp3"
             },
             {
                 type: 'photos',
@@ -277,94 +285,94 @@
                     "https://reubenivy.github.io/moments/07_jan_2025.png"
                 ],
                 duration: 11000,
-                track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3',
+                track: "recap_asset/canon_in_d.mp3",
                 photoDelay: 5000
             },
 			{
                 type: 'text',
                 content: 'Our first date',
                 duration: 5000,
-                track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3'
+                track: "recap_asset/canon_in_d.mp3"
             },
             {
                 type: 'photos',
                 content: [
-					"https://reubenivy.github.io/recap_asset/stay_bp.png",
-					"https://reubenivy.github.io/recap_asset/stay_bp_2.png",
-					"https://reubenivy.github.io/recap_asset/first_date.png",
+					"recap_asset/stay_bp.png",
+					"recap_asset/stay_bp_2.png",
+					"recap_asset/first_date.png",
                     "https://reubenivy.github.io/moments/18_jan_2025.png",
                 ],
                 duration: 26000,
-                track: 'https://reubenivy.github.io/recap_asset/canon_in_d.mp3',
+                track: "recap_asset/canon_in_d.mp3",
                 photoDelay: 5000
             },
 			{
                 type: 'text',
                 content: 'After a few dates,<br>we became official after 30km in a day<br>她说好!',
                 duration: 7500,
-                track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3'
+                track: "recap_asset/nu_hai_2.mp3"
             },
 			{
                 type: 'photos',
                 content: [
                     "https://reubenivy.github.io/moments/14_feb_2025_1.jpg",
                     "https://reubenivy.github.io/moments/14_feb_2025_2.jpg",
-					"https://reubenivy.github.io/recap_asset/pangsua_pond.png",
+					"recap_asset/pangsua_pond.png",
 					"https://reubenivy.github.io/moments/14_feb_2025_5.jpg",
 					"https://reubenivy.github.io/moments/18_feb_2025_2.jpg"
                 ],
                 duration: 26000,
-                track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3',
+                track: "recap_asset/nu_hai_2.mp3",
                 photoDelay: 5000
             },
 			{
                 type: 'text',
                 content: 'Couple Profile Pic moment',
                 duration: 7500,
-                track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3'
+                track: "recap_asset/nu_hai_2.mp3"
             },
 			{
                 type: 'photos',
                 content: [
-                    "https://reubenivy.github.io/recap_asset/change_pic_feb_21.png",
-					"https://reubenivy.github.io/recap_asset/couple_pic.png"
+                    "recap_asset/change_pic_feb_21.png",
+					"recap_asset/couple_pic.png"
                 ],
                 duration: 16000,
-                track: 'https://reubenivy.github.io/recap_asset/nu_hai_2.mp3',
+                track: "recap_asset/nu_hai_2.mp3",
                 photoDelay: 5000
             },
 			{
                 type: 'text',
                 content: 'Every night before we sleep',
                 duration: 7500,
-                track: 'https://reubenivy.github.io/recap_asset/we_are_young_2.mp3'
+                track: "recap_asset/we_are_young_2.mp3"
             },
 			{
                 type: 'photos',
                 content: [
-					"https://reubenivy.github.io/recap_asset/chat_4.png",
-					"https://reubenivy.github.io/recap_asset/chat_5.png",
-					"https://reubenivy.github.io/recap_asset/chat_6.jpg",
-					"https://reubenivy.github.io/recap_asset/chat_7.png",
-					"https://reubenivy.github.io/recap_asset/chat_8.png",
-					"https://reubenivy.github.io/recap_asset/chat_9.png",
-					"https://reubenivy.github.io/recap_asset/chat_10.png",
-					"https://reubenivy.github.io/recap_asset/chat_11.png",
-					"https://reubenivy.github.io/recap_asset/chat_12.png",
-					"https://reubenivy.github.io/recap_asset/chat_1.png",
-					"https://reubenivy.github.io/recap_asset/chat_2.png",
-					"https://reubenivy.github.io/recap_asset/chat_3.png",
-					"https://reubenivy.github.io/recap_asset/chat_13.png",
+					"recap_asset/chat_4.png",
+					"recap_asset/chat_5.png",
+					"recap_asset/chat_6.jpg",
+					"recap_asset/chat_7.png",
+					"recap_asset/chat_8.png",
+					"recap_asset/chat_9.png",
+					"recap_asset/chat_10.png",
+					"recap_asset/chat_11.png",
+					"recap_asset/chat_12.png",
+					"recap_asset/chat_1.png",
+					"recap_asset/chat_2.png",
+					"recap_asset/chat_3.png",
+					"recap_asset/chat_13.png",
                 ],
                 duration: 42000,
-                track: 'https://reubenivy.github.io/recap_asset/we_are_young_2.mp3',
+                track: "recap_asset/we_are_young_2.mp3",
                 photoDelay: 3000
             },
 			{
                 type: 'text',
                 content: '我们一起追的剧s',
                 duration: 7500,
-                track: 'https://reubenivy.github.io/recap_asset/hanzawa_2.mp3'
+                track: "recap_asset/hanzawa_2.mp3"
             },
 			{
                 type: 'photos',
@@ -372,22 +380,23 @@
                     "https://reubenivy.github.io/moments/13_apr_2025_1.jpg",
                     "https://reubenivy.github.io/moments/18_may_2025_1.jpg",
 					"https://reubenivy.github.io/moments/1_jun_2025_5.jpg",
-					"https://reubenivy.github.io/recap_asset/legal_high.jpg",
-					"https://reubenivy.github.io/recap_asset/couple_or_trouble.jpg",
+					"recap_asset/reborn_rich.jpg",
+					"recap_asset/legal_high.jpg",
+					"recap_asset/couple_or_trouble.jpg",
 					"https://reubenivy.github.io/moments/4_oct_2025_0.jpg",
-					"https://reubenivy.github.io/recap_asset/spy_family.jpg",
-					"https://reubenivy.github.io/recap_asset/news_queen.jpg",
-					"https://reubenivy.github.io/recap_asset/heaven_official_blessing.jpg"
+					"recap_asset/spy_family.jpg",
+					"recap_asset/news_queen.jpg",
+					"recap_asset/heaven_official_blessing.jpg"
                 ],
                 duration: 30000,
-                track: 'https://reubenivy.github.io/recap_asset/hanzawa_2.mp3',
+                track: "recap_asset/hanzawa_2.mp3",
                 photoDelay: 3000
             },
 			{
                 type: 'text',
                 content: 'And 电影s',
                 duration: 7500,
-                track: 'https://reubenivy.github.io/recap_asset/zoo.mp3'
+                track: "recap_asset/zoo.mp3"
             },
 			{
                 type: 'photos',
@@ -400,24 +409,24 @@
 					"https://reubenivy.github.io/moments/29_mar_2025_5.jpg",
 					"https://reubenivy.github.io/moments/4_may_2025_3.jpg",
 					"https://reubenivy.github.io/moments/25_may_2025_1.jpg",
-					"https://reubenivy.github.io/recap_asset/loving_vincent.jpg",
+					"recap_asset/loving_vincent.jpg",
 					"https://reubenivy.github.io/moments/1_jun_2025_2.jpg",
 					"https://reubenivy.github.io/moments/12_jul_2025_2.jpg",
 					"https://reubenivy.github.io/moments/19_jul_2025_2.jpg",
 					"https://reubenivy.github.io/moments/27_jul_2025_3.jpg",
-					"https://reubenivy.github.io/recap_asset/zootopia.jpg",
+					"recap_asset/zootopia.jpg",
 					"https://reubenivy.github.io/moments/29_nov_2025_10.jpg",
 					"https://reubenivy.github.io/moments/6_dec_2025_3.jpg"
                 ],
                 duration: 35000,
-                track: 'https://reubenivy.github.io/recap_asset/zoo.mp3',
+                track: "recap_asset/zoo.mp3",
                 photoDelay: 2000
             },
 			{
                 type: 'text',
                 content: 'And Piano Concerts',
                 duration: 7500,
-                track: 'https://reubenivy.github.io/recap_asset/nocturne.mp3'
+                track: "recap_asset/nocturne.mp3"
             },
 			{
                 type: 'photos',
@@ -431,14 +440,14 @@
 					
                 ],
                 duration: 33000,
-                track: 'https://reubenivy.github.io/recap_asset/nocturne.mp3',
+                track: "recap_asset/nocturne.mp3",
                 photoDelay: 5000
             },
 			{
                 type: 'text',
                 content: 'And many more performances and experiences',
                 duration: 7500,
-                track: 'https://reubenivy.github.io/recap_asset/lalaland.mp3'
+                track: "recap_asset/lalaland.mp3"
             },
 			{
                 type: 'photos',
@@ -453,10 +462,30 @@
 					"https://reubenivy.github.io/moments/25_may_2025_6.jpg",
 					"https://reubenivy.github.io/moments/15_mar_2025_5.jpg",
 					"https://reubenivy.github.io/moments/15_mar_2025_4.jpg",
-					"https://reubenivy.github.io/moments/15_mar_2025_2.jpg"
-                ],
-                duration: 25000,
-                track: 'https://reubenivy.github.io/recap_asset/lalaland.mp3',
+					"https://reubenivy.github.io/moments/1_feb_2025_1.jpg",
+					"https://reubenivy.github.io/moments/15_mar_2025_6.jpg",
+					"https://reubenivy.github.io/moments/5_apr_2025_3.jpeg",
+					"https://reubenivy.github.io/moments/15_apr_2025_3.jpeg",
+					"https://reubenivy.github.io/moments/7_may_2025_1.jpeg",
+					"https://reubenivy.github.io/moments/22_jun_2025_4.jpeg",
+					"https://reubenivy.github.io/moments/4_jul_2025_4.jpg",
+					"https://reubenivy.github.io/moments/5_jul_2025_3.jpg",
+					"https://reubenivy.github.io/moments/14_jul_2025_2.jpeg",
+					"https://reubenivy.github.io/moments/14_jul_2025_5.jpeg",
+					"https://reubenivy.github.io/moments/14_aug_2025_6.jpeg",
+					"https://reubenivy.github.io/moments/14_aug_2025_2.jpeg",
+					"https://reubenivy.github.io/moments/14_aug_2025_18.jpg",
+					"https://reubenivy.github.io/moments/7_sep_2025_7.jpeg",
+					"https://reubenivy.github.io/moments/4_oct_2025_1.jpeg",
+					"https://reubenivy.github.io/moments/4_oct_2025_4.jpg",
+					"https://reubenivy.github.io/moments/25_oct_2025_1.jpg",
+					"https://reubenivy.github.io/moments/29_nov_2025_6.jpg",
+					"https://reubenivy.github.io/moments/6_dec_2025_5.jpg",
+					"https://reubenivy.github.io/moments/6_dec_2025_1.jpeg",
+					"https://reubenivy.github.io/recap_asset/fam_lunch.jpeg"
+				],
+                duration: 65000,
+                track: "https://reubenivy.github.io/recap_asset/lalaland.mp3",
                 photoDelay: 2000
             },
             {
@@ -467,7 +496,7 @@
             },
             {
                 type: 'video',
-                content: 'https://reubenivy.github.io/recap_asset/wise_men_say_2.mp4', 
+                content: "https://reubenivy.github.io/recap_asset/wise_men_say_2.mp4", 
                 duration: 77000, 
                 track: ''
             },
